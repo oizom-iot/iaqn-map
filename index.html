@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <style>
+        #map {
+            height: 80vh;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+        button, input, select {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="parameter">Parameter:</label>
+        <select id="parameter">
+            <option value="pm25">PM2.5</option>
+            <option value="pm10">PM10</option>
+        </select>
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" />
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" />
+        <button id="loadHeatmaps">Load Heatmaps</button>
+        <button id="playPauseHeatmap">Play Heatmap</button>
+        <label for="slider">Date Slider:</label>
+        <input type="range" id="slider" min="0" max="0" value="0" step="1" />
+        <p id="currentDate">Date: </p>
+        <label for="opacity">Opacity:</label>
+        <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.5" />
+    </div>
+    <div id="map"></div>
+
+    <script>
+        const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
+        const map = L.map('map').setView([27.0, 80.0], 5); // Adjust to your region
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+        const geojsonPath = 'india.geojson';
+        let currentIndex = 0;
+        let heatmapLayer = null;
+        let heatmapPlaying = false;
+        let playInterval;
+        let polygonBounds = null;
+        let heatmaps = [];
+
+        // Load GeoJSON to get the polygon bounds
+        const geojsonLayer = new L.GeoJSON.AJAX(geojsonPath, {
+            onEachFeature: function (feature, layer) {
+                polygonBounds = layer.getBounds(); // Store the bounds of the GeoJSON
+                map.fitBounds(polygonBounds); // Fit the map to the polygon bounds
+            }
+        });
+
+        // Update heatmap based on index
+        function updateHeatmap(index) {
+            if (heatmapLayer) map.removeLayer(heatmapLayer);
+            if (index < heatmaps.length) {
+                const imageURL = heatmaps[index];
+                heatmapLayer = L.imageOverlay(imageURL, polygonBounds, { opacity: document.getElementById('opacity').value }).addTo(map);
+
+                const currentDate = heatmaps[index].split('/').pop().replace('.png', '');
+                document.getElementById('currentDate').textContent = `Date: ${currentDate}`;
+            }
+        }
+
+        // Load heatmaps based on date range and selected parameter
+        document.getElementById('loadHeatmaps').addEventListener('click', () => {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const parameter = document.getElementById('parameter').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates.');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            // Generate heatmap URLs for the selected date range and parameter
+            heatmaps = [];
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const formattedDate = d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+                heatmaps.push(`${s3BaseURL}/${parameter}/${formattedDate}.png`);
+            }
+
+            if (heatmaps.length === 0) {
+                alert('No heatmaps available for the selected date range.');
+                return;
+            }
+
+            // Configure the slider
+            const slider = document.getElementById('slider');
+            slider.min = 0;
+            slider.max = heatmaps.length - 1;
+            slider.value = 0;
+
+            currentIndex = 0;
+            updateHeatmap(currentIndex);
+        });
+
+        // Play/Pause heatmap animation
+        document.getElementById('playPauseHeatmap').addEventListener('click', () => {
+            const button = document.getElementById('playPauseHeatmap');
+            if (heatmapPlaying) {
+                clearInterval(playInterval);
+                button.textContent = 'Play Heatmap';
+            } else {
+                playInterval = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % heatmaps.length;
+                    updateHeatmap(currentIndex);
+                    document.getElementById('slider').value = currentIndex; // Sync slider with autoplay
+                }, 1000); // Change heatmap every second
+                button.textContent = 'Pause Heatmap';
+            }
+            heatmapPlaying = !heatmapPlaying;
+        });
+
+        // Manual slider control for heatmaps
+        document.getElementById('slider').addEventListener('input', (e) => {
+            currentIndex = parseInt(e.target.value, 10);
+            updateHeatmap(currentIndex);
+        });
+
+        // Update opacity dynamically
+        document.getElementById('opacity').addEventListener('input', () => {
+            if (heatmapLayer) {
+                heatmapLayer.setOpacity(document.getElementById('opacity').value);
+            }
+        });
+    </script>
+</body>
+</html>
