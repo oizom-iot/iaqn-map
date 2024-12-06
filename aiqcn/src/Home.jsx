@@ -8,9 +8,20 @@ import { Field } from '@/components/ui/field';
 import geojsonBounds from '@/constants/geojsonBounds.json';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import AQIHeatmapLayer from './heatmap';
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
+const images = {};
+function preload(urls) {
+  for (const url of urls) {
+    images[url] = new Image();
+    images[url].src = url;
+  }
+}
+const playSpeedMs = 1000;
+const transitionTimeMs = playSpeedMs / 4;
+const transitionSteps = 100;
 const Home = () => {
   const [startDate, setStartDate] = useState('2024-10-01');
   const [endDate, setEndDate] = useState('2024-12-01');
@@ -22,7 +33,6 @@ const Home = () => {
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
-
   const map = useRef();
 
 
@@ -50,7 +60,7 @@ const Home = () => {
     } else {
       playIntervalRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % heatmaps.length);
-      }, 1000); // Change heatmap every second
+      }, playSpeedMs); // Change heatmap every second
     }
     setHeatmapPlaying(!heatmapPlaying);
   };
@@ -88,8 +98,7 @@ const Home = () => {
     };
   }, []);
 
-
-
+  preload(heatmaps);
   return (
     <Flex direction="column" height="100vh" width="100vw">
       {/* Top Toolbar */}
@@ -126,12 +135,15 @@ const Home = () => {
             zIndex={0}
           />
           {heatmaps.length > 0 && polygonBounds && (
-            <ImageOverlay
-              url={heatmaps[currentIndex]}
-              bounds={polygonBounds}
+            <AQIHeatmapLayer 
+              heatmaps={heatmaps}
+              currentIndex={currentIndex}
+              polygonBounds={polygonBounds}
               opacity={opacity}
-              zIndex={100}
-            />)}
+              transitionIntervalInMs={transitionTimeMs}
+              transitionSteps={transitionSteps}
+            />
+          )}
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -240,7 +252,7 @@ const Home = () => {
                     <div className="aqi-segment yellow"></div>
                     <div className="aqi-segment orange"></div>
                     <div className="aqi-segment red"></div>
-                    <div class="aqi-segment maroon"></div>
+                    <div className="aqi-segment maroon"></div>
                   </div>
                   <div className="aqi-scale">
                     <span>0</span>
