@@ -148,4 +148,7 @@ body {
   cursor: pointer;
   text-decoration: none;
   margin-right: 10px;
+  width: 50%;
+  text-align: right;
+  padding: 0 5px;
 }
