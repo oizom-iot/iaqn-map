@@ -27,6 +27,7 @@ body {
   width: fit-content;
   min-width: 70vw;
   max-width: 90vw;
+  margin-bottom: 10px;
 }
 
 .datepicker{
@@ -146,5 +147,5 @@ body {
   color: #007bff;
   cursor: pointer;
   text-decoration: none;
-  width: 50%;
+  margin-right: 10px;
 }

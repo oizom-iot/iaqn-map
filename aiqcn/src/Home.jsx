@@ -12,7 +12,7 @@ import L from 'leaflet';
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
 const Home = () => {
-  const [startDate, setStartDate] = useState('2024-11-01');
+  const [startDate, setStartDate] = useState('2024-10-01');
   const [endDate, setEndDate] = useState('2024-12-01');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
@@ -114,14 +114,14 @@ const Home = () => {
       <Box display={'flex'} flex="1">
         <MapContainer
           center={[27.0, 80.0]}
-          zoom={5}
+          zoom={6}
           style={{ width: '100%', flexGrow: 1, display: 'flex' }}
           ref={map}
         >
           <TileLayer
             url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            subdomains="abcd"
+            subdomains="iaqn.org"
             maxZoom={20}
             zIndex={0}
           />
@@ -135,8 +135,9 @@ const Home = () => {
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            subdomains="abcd"
+            subdomains="iaqn.org"
             maxZoom={20}
+            opacity={0.5}
             zIndex={200}
             pane='overlayPane'
           />
@@ -251,7 +252,7 @@ const Home = () => {
                     <span>500</span>
                   </div>
                 </div>
-                <a className='aqi-footer' href="https://cpcb.nic.in/National-Air-Quality-Index/">National Air Quality Index • Learn More</a>
+                <a className='aqi-footer' target='_blank' href="https://cpcb.nic.in/National-Air-Quality-Index/">National Air Quality Index • Learn More</a>
               </div>
             </div>
 
