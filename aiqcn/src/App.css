@@ -1,6 +1,11 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&display=swap');
 
+html{
+  width: 100vw;
+  height: 100vh;
+}
+
 body {
   font-family: 'Schibsted Grotesk', sans-serif;
   background-color: #f0f0f0;
@@ -14,11 +19,13 @@ body {
 .slider-container {
   background: rgba(36, 34, 32, 0.9); /* Semi-transparent dark background */
   border-radius: 10px;
-  padding: 7px;
+  padding:15px 10px 10px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  min-width: 60vw;
+  gap: 0.3rem;
+  width: fit-content;
+  min-width: 70vw;
   max-width: 90vw;
 }
 
@@ -40,6 +47,7 @@ body {
   -webkit-mask-size: contain;
   cursor: pointer;
   align-self: flex-start;
+  margin: 4px 0;
 }
 
 .slider {
@@ -50,7 +58,7 @@ body {
   background: #007bff;
   border-radius: 5px;
   outline: none;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease-in-out;
 }
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -60,7 +68,7 @@ body {
   background: #fff;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease-in-out;
  
 }
 .slider::-moz-range-thumb {
@@ -69,14 +77,13 @@ body {
   background: #007bff;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .timestamp {
   color: white;
   font-size: 12px;
   white-space: nowrap;
-  padding: 5px 0 0;
 }
 
 .leaflet-control-zoom {
@@ -86,17 +93,18 @@ body {
 }
 
 .aqi-container {
-  border-radius: 8px;
-  padding: 10px 10px 2px;
-  max-width: 40vw;
-  min-width: 30vw;
+  border-radius: 8px; 
+  min-width: 60%;
+  width: fit-content;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  scale: 0.7;
+  
 }
 .aqi-header {
   font-size: 12px;
   font-weight: bold;
   color: black;
+  margin-bottom: 4px;
 }
 .aqi-subheader {
   font-size: 10px;
@@ -107,8 +115,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: black;
-  font-size: 0.6rem;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 .aqi-bar {
   display: flex;
@@ -133,8 +142,9 @@ body {
   justify-content: space-between;
 }
 .aqi-footer {
-  font-size: 9px;
-  color: #0073e6;
+  font-size: 12px;
+  color: #007bff;
   cursor: pointer;
   text-decoration: none;
+  width: 50%;
 }

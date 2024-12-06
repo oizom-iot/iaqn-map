@@ -46,8 +46,6 @@ const Home = () => {
   const togglePlayPause = () => {
     if (heatmaps.length === 0) return;
     if (heatmapPlaying) {
-      console.log('clearing interval');
-      
       clearInterval(playIntervalRef.current);
     } else {
       playIntervalRef.current = setInterval(() => {
@@ -90,7 +88,7 @@ const Home = () => {
     };
   }, []);
 
- 
+
 
   return (
     <Flex direction="column" height="100vh" width="100vw">
@@ -99,178 +97,166 @@ const Home = () => {
         as="header"
         bg="white"
         color="black"
-        padding={'0.8rem 2rem'}
+        padding={'0.8rem 1rem'}
         zIndex={1000}
-        position="absolute"
-        top={0}
         width="100%"
         display="flex"
         justifyContent="space-between"
         alignItems="center"
       >
-        <Text fontSize="lg" fontWeight="bold">
-          Air India Quality Control Network
-        </Text>
+        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
         <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}>
           How To?
         </Button>
       </Box>
 
       {/* Map */}
-      <Box flex="1" mt={16} position="relative">
+      <Box display={'flex'} flex="1">
         <MapContainer
           center={[27.0, 80.0]}
           zoom={5}
-          style={{ height: '100%', width: '100%' }}
+          style={{ width: '100%', flexGrow: 1, display: 'flex' }}
           ref={map}
-        > 
-           <TileLayer
-        url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        subdomains="abcd"
-        maxZoom={20}
-        zIndex={0}
-      />
-      {heatmaps.length > 0 && polygonBounds && (
+        >
+          <TileLayer
+            url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            subdomains="abcd"
+            maxZoom={20}
+            zIndex={0}
+          />
+          {heatmaps.length > 0 && polygonBounds && (
             <ImageOverlay
               url={heatmaps[currentIndex]}
               bounds={polygonBounds}
               opacity={opacity}
               zIndex={100}
-            />)} 
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        subdomains="abcd"
-        maxZoom={20}
-        zIndex={200}
-        pane='overlayPane'
-      />
-          
+            />)}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            subdomains="abcd"
+            maxZoom={20}
+            zIndex={200}
+            pane='overlayPane'
+          />
+
         </MapContainer>
 
         {/* Controls */}
         <Box
           display="flex"
-          position="absolute"
-          bottom={0}
+          position="fixed"
+          bottom={2}
           bg="transparent"
-          p={4}
           borderRadius="lg"
           zIndex={1000}
-          gap={3}
           width="100vw"
           justifyContent="center"
+          height={'fit-content'}
         >
-          <HStack width={'100%'} display={'flex'} justifyContent={'center'} spacing={5}>
+          <VStack width={'100%'} display={'flex'} gap={0}>
             <div className="slider-container">
-              {/* Date Picker */}
-              <PopoverRoot open={popoverOpen} onOpenChange={(e) => setPopoverOpen(e.open)} positioning={{ placement: "top-end" }}>
-                <PopoverTrigger asChild>
-                  <div className="play-button">
-                    <Button onClick={() => {setPopoverOpen(true); heatmapPlaying && togglePlayPause();}} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
-                      <IoCalendar />
-                    </Button>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverBody bg="rgba(36, 34, 32, 0.9);">
-                    <Stack gap="4">
-                      <Field label="From">
-                        <input
-                          type="date"
-                          value={startDate}
-                          onChange={(e) => setStartDate(e.target.value)}
-                          className='datepicker'
-                        />
-                      </Field>
-                      <Field label="To">
-                        <input
-                          type="date"
-                          value={endDate}
-                          className='datepicker'
-                          onChange={(e) => setEndDate(e.target.value)}
-                        />
-                      </Field>
-                      <Button bg={'white'} onClick={loadHeatmaps}>
-                        Apply
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', width: '100%' }}>
+                {/* Date Picker */}
+                <PopoverRoot open={popoverOpen} onOpenChange={(e) => setPopoverOpen(e.open)} positioning={{ placement: "top-end" }}>
+                  <PopoverTrigger asChild>
+                    <div className="play-button">
+                      <Button onClick={() => { setPopoverOpen(true); heatmapPlaying && togglePlayPause(); }} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
+                        <IoCalendar />
                       </Button>
-                    </Stack>
-                  </PopoverBody>
-                </PopoverContent>
-              </PopoverRoot>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverBody bg="rgba(36, 34, 32, 0.9);">
+                      <Stack gap="4">
+                        <Field label="From">
+                          <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className='datepicker'
+                          />
+                        </Field>
+                        <Field label="To">
+                          <input
+                            type="date"
+                            value={endDate}
+                            className='datepicker'
+                            onChange={(e) => setEndDate(e.target.value)}
+                          />
+                        </Field>
+                        <Button bg={'white'} onClick={loadHeatmaps}>
+                          Apply
+                        </Button>
+                      </Stack>
+                    </PopoverBody>
+                  </PopoverContent>
+                </PopoverRoot>
 
-              {/* Play/Pause Button */}
-              <div className="play-button">
-                <Button
-                  padding={0}
-                  color={'white'}
-                  bg={'transparent'}
-                  outline={'none'}
-                  width={'1rem'}
-                  onClick={togglePlayPause}
-                >
-                  {heatmapPlaying ? <IoPause /> : <IoPlay />}
-                </Button>
-              </div>
+                {/* Play/Pause Button */}
+                <div className="play-button">
+                  <Button
+                    padding={0}
+                    color={'white'}
+                    bg={'transparent'}
+                    outline={'none'}
+                    width={'1rem'}
+                    onClick={togglePlayPause}
+                  >
+                    {heatmapPlaying ? <IoPause /> : <IoPlay />}
+                  </Button>
+                </div>
 
-              {/* Slider */}
-              <div style={{ width: '100%' }}>
-                <input
-                  type="range"
-                  min="0"
-                  max={heatmaps.length - 1}
-                  value={currentIndex}
-                  onChange={handleSliderChange}
-                  className="slider"
-                />
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <span className="timestamp">
-                    {heatmaps[currentIndex]?.split('/').pop()?.replace('.png', '') || '--'}
-                  </span>
+                {/* Slider */}
+                <div style={{ width: '100%', marginRight: '0.5rem' }}>
+                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'> {new Date(heatmaps[currentIndex]?.split('/').pop()?.replace('.png', '')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || '--'}</div>
+                  <input
+                    type="range"
+                    min="0"
+                    max={heatmaps.length - 1}
+                    value={currentIndex}
+                    onChange={handleSliderChange}
+                    className="slider"
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{display:'flex', alignItems:'center', justifyContent:'space-between'}} className="timestamp">
+                     {new Date(startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                    <span style={{display:'flex', alignItems:'center', justifyContent:'space-between'}} className="timestamp">
+                     {new Date(endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Opacity Control */}
-              <div style={{width: 'fit-content', display: 'flex', justifyContent: 'space-between', flexDirection: 'column', height: '100%', padding: '0.5rem 1rem 0'}}>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={opacity}
-                  onChange={(e) => setOpacity(e.target.value)}
-                  className='slider'
-                  style={{ width: '10rem', backgroundColor: 'orange', marginBottom: '0.5rem' }}
-                />
-                <p style={{ fontSize: '12px', display: 'flex', justifyContent: 'center'}}>Opacity</p>
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="aqi-container">
+                  <div className="aqi-bar">
+                    <div className="aqi-segment green"></div>
+                    <div className="aqi-segment lightgreen"></div>
+                    <div className="aqi-segment yellow"></div>
+                    <div className="aqi-segment orange"></div>
+                    <div className="aqi-segment red"></div>
+                    <div class="aqi-segment maroon"></div>
+                  </div>
+                  <div className="aqi-scale">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                    <span>200</span>
+                    <span>300</span>
+                    <span>400</span>
+                    <span>500</span>
+                  </div>
+                </div>
+                <a className='aqi-footer' href="https://cpcb.nic.in/National-Air-Quality-Index/">National Air Quality Index • Learn More</a>
               </div>
             </div>
-            <div className="aqi-container">
-    <div className="aqi-header">Air quality in this area</div>
-    <div className="aqi-subheader">Tap on map to see more info</div>
-    <div className="aqi-bar">
-      <div className="aqi-segment green"></div>
-      <div className="aqi-segment lightgreen"></div>
-      <div className="aqi-segment yellow"></div>
-      <div className="aqi-segment orange"></div>
-      <div className="aqi-segment red"></div>
-      <div class="aqi-segment maroon"></div>
-    </div>
-    <div className="aqi-scale">
-      <span>0</span>
-      <span>50</span>
-      <span>100</span>
-      <span>200</span>
-      <span>300</span>
-      <span>400</span>
-      <span>500</span>
-    </div>
-    <a className="aqi-footer" href="#">National Air Quality Index · Learn more</a>
-  </div>
-          </HStack>
-         
+
+          </VStack>
+
         </Box>
       </Box>
     </Flex>
