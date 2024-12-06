@@ -85,3 +85,56 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);  /* Add shadow */
 }
 
+.aqi-container {
+  border-radius: 8px;
+  padding: 10px 10px 2px;
+  max-width: 40vw;
+  min-width: 30vw;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+.aqi-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: black;
+}
+.aqi-subheader {
+  font-size: 10px;
+  color: #555;
+  margin-bottom: 3px;
+}
+.aqi-scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: black;
+  font-size: 0.6rem;
+}
+.aqi-bar {
+  display: flex;
+  height: 12px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.aqi-segment {
+  flex: 1;
+}
+.aqi-segment.green { background-color: #00e400; }
+.aqi-segment.lightgreen { background-color: #9cff00; }
+.aqi-segment.yellow { background-color: #ffff00; }
+.aqi-segment.orange { background-color: #ff7e00; }
+.aqi-segment.red { background-color: #ff0000; }
+.aqi-segment.maroon { background-color: #8f3f97; }
+.aqi-labels {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+.aqi-footer {
+  font-size: 9px;
+  color: #0073e6;
+  cursor: pointer;
+  text-decoration: none;
+}

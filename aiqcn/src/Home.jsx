@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Flex, Text, Button, VStack, Stack } from '@chakra-ui/react';
+import { Box, Flex, Text, Button, VStack, Stack, HStack } from '@chakra-ui/react';
 import { MapContainer, TileLayer, useMap, ImageOverlay, ZoomControl } from 'react-leaflet';
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
 import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
@@ -90,6 +90,8 @@ const Home = () => {
     };
   }, []);
 
+ 
+
   return (
     <Flex direction="column" height="100vh" width="100vw">
       {/* Top Toolbar */}
@@ -97,7 +99,7 @@ const Home = () => {
         as="header"
         bg="white"
         color="black"
-        p={4}
+        padding={'0.8rem 2rem'}
         zIndex={1000}
         position="absolute"
         top={0}
@@ -121,19 +123,30 @@ const Home = () => {
           zoom={5}
           style={{ height: '100%', width: '100%' }}
           ref={map}
-        >
-          
-          <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.png"
-          />
-          {heatmaps.length > 0 && polygonBounds && (
+        > 
+           <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        subdomains="abcd"
+        maxZoom={20}
+        zIndex={0}
+      />
+      {heatmaps.length > 0 && polygonBounds && (
             <ImageOverlay
               url={heatmaps[currentIndex]}
-              bounds={polygonBounds || geojsonBounds}
+              bounds={polygonBounds}
               opacity={opacity}
               zIndex={100}
             />)} 
+      <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        subdomains="abcd"
+        maxZoom={20}
+        zIndex={200}
+        pane='overlayPane'
+      />
+          
         </MapContainer>
 
         {/* Controls */}
@@ -149,13 +162,13 @@ const Home = () => {
           width="100vw"
           justifyContent="center"
         >
-          <VStack width={'100%'} spacing={5}>
+          <HStack width={'100%'} display={'flex'} justifyContent={'center'} spacing={5}>
             <div className="slider-container">
               {/* Date Picker */}
               <PopoverRoot open={popoverOpen} onOpenChange={(e) => setPopoverOpen(e.open)} positioning={{ placement: "top-end" }}>
                 <PopoverTrigger asChild>
                   <div className="play-button">
-                    <Button onClick={() => {setPopoverOpen(true); togglePlayPause();}} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
+                    <Button onClick={() => {setPopoverOpen(true); heatmapPlaying && togglePlayPause();}} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
                       <IoCalendar />
                     </Button>
                   </div>
@@ -220,7 +233,7 @@ const Home = () => {
               </div>
 
               {/* Opacity Control */}
-              <div style={{width: 'fit-content', display: 'flex', justifyContent: 'space-between', flexDirection: 'column', height: '100%', padding: '0.7rem 1rem 0'}}>
+              <div style={{width: 'fit-content', display: 'flex', justifyContent: 'space-between', flexDirection: 'column', height: '100%', padding: '0.5rem 1rem 0'}}>
                 <input
                   type="range"
                   min="0"
@@ -229,12 +242,35 @@ const Home = () => {
                   value={opacity}
                   onChange={(e) => setOpacity(e.target.value)}
                   className='slider'
-                  style={{ width: '10rem', backgroundColor: 'orange' }}
+                  style={{ width: '10rem', backgroundColor: 'orange', marginBottom: '0.5rem' }}
                 />
                 <p style={{ fontSize: '12px', display: 'flex', justifyContent: 'center'}}>Opacity</p>
               </div>
             </div>
-          </VStack>
+            <div className="aqi-container">
+    <div className="aqi-header">Air quality in this area</div>
+    <div className="aqi-subheader">Tap on map to see more info</div>
+    <div className="aqi-bar">
+      <div className="aqi-segment green"></div>
+      <div className="aqi-segment lightgreen"></div>
+      <div className="aqi-segment yellow"></div>
+      <div className="aqi-segment orange"></div>
+      <div className="aqi-segment red"></div>
+      <div class="aqi-segment maroon"></div>
+    </div>
+    <div className="aqi-scale">
+      <span>0</span>
+      <span>50</span>
+      <span>100</span>
+      <span>200</span>
+      <span>300</span>
+      <span>400</span>
+      <span>500</span>
+    </div>
+    <a className="aqi-footer" href="#">National Air Quality Index · Learn more</a>
+  </div>
+          </HStack>
+         
         </Box>
       </Box>
     </Flex>
