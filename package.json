@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rm -r _static 2>/dev/null;vite build",
-    "start": "node sammy.js; serve -s _static -l tcp://0.0.0.0:$PORT -n",
+    "start": "serve -s _static -l tcp://0.0.0.0:$PORT -n",
     "dev": "vite",
     "lint": "eslint .",
     "preview": "vite preview"
