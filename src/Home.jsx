@@ -124,6 +124,8 @@ const Home = () => {
         <MapContainer
           center={[27.0, 80.0]}
           zoom={6}
+          minZoom={6}
+          maxZoom={18}
           style={{ width: '100%', flexGrow: 1, display: 'flex' }}
           ref={map}
         >
@@ -131,7 +133,6 @@ const Home = () => {
             url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             subdomains="iaqn.org"
-            maxZoom={20}
             zIndex={0}
           />
           {heatmaps.length > 0 && polygonBounds && (
@@ -148,7 +149,6 @@ const Home = () => {
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             subdomains="iaqn.org"
-            maxZoom={20}
             opacity={0.5}
             zIndex={200}
             pane='overlayPane'
