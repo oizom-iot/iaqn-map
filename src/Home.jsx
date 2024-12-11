@@ -22,20 +22,23 @@ function preload(urls) {
 
 const geojsons = {}; // Global dictionary to store preloaded GeoJSON data
 
-// Preload GeoJSON files
-async function preloadGeoJSON(urls) {
+const preloadGeoJSON = async (urls, setFiremaps) => {
   for (const url of urls) {
     if (!geojsons[url]) {
       try {
         const response = await fetch(url);
-        geojsons[url] = await response.json(); // Store parsed GeoJSON data
+        const data = await response.json();
+        geojsons[url] = data; // Store parsed GeoJSON data
+
+        // Update firemaps incrementally
+        setFiremaps((prevFiremaps) => [...prevFiremaps, data]);
       } catch (error) {
         console.error(`Error preloading GeoJSON: ${url}`, error);
         geojsons[url] = null; // Mark as failed to load
       }
     }
   }
-}
+};
 
 const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
   const map = useMap(); // Access Leaflet map instance
@@ -75,14 +78,14 @@ const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const Home = () => {
-  const [startDate, setStartDate] = useState('2024-10-01');
-  const [endDate, setEndDate] = useState('2024-12-01');
+  const [startDate, setStartDate] = useState('2024-10-15');
+  const [endDate, setEndDate] = useState('2024-12-15');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heatmapPlaying, setHeatmapPlaying] = useState(false);
-  const [opacity, setOpacity] = useState(0.5);
+  const [opacity, setOpacity] = useState(0.6);
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -140,14 +143,16 @@ const Home = () => {
     const heatmapUrls = generateHeatmapUrls(start, end, parameter);
     const firemapUrls = generateFiremapUrls(start, end);
   
-    // Preload GeoJSON data
-    await preloadGeoJSON(firemapUrls);
-  
     setHeatmaps(heatmapUrls);
-    setFiremaps(firemapUrls.map(url => geojsons[url])); // Pass preloaded data instead of URLs
     setCurrentIndex(0);
     setPopoverOpen(false);
-    togglePlayPause();
+
+    // Start GeoJSON preloading in the background
+    // Start GeoJSON preloading in the background with incremental updates
+    preloadGeoJSON(firemapUrls, setFiremaps);
+
+    // Start heatmap playback
+    togglePlayPause();  
   };
 
   // Cleanup interval on component unmount

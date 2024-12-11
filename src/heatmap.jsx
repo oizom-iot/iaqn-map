@@ -73,6 +73,14 @@ const AQIHeatmapLayer = ({
 
   return (
     <>
+      {/* Render GeoJSON layer with custom markers */}
+      {firemaps[currentIndex] && (
+        <GeoJSON
+          key={currentIndex} // Force re-render when currentIndex changes
+          data={firemaps[currentIndex]} // Use preloaded GeoJSON data
+          pointToLayer={pointToLayer} // Customize point markers
+        />
+      )}
       {/* Transitioning Image Overlay */}
       {transitionStage.nextImage ? (
         <>
@@ -95,15 +103,6 @@ const AQIHeatmapLayer = ({
           bounds={polygonBounds}
           opacity={opacity}
           zIndex={100}
-        />
-      )}
-
-      {/* Render GeoJSON layer with custom markers */}
-      {firemaps[currentIndex] && (
-        <GeoJSON
-          key={currentIndex} // Force re-render when currentIndex changes
-          data={firemaps[currentIndex]} // Use preloaded GeoJSON data
-          pointToLayer={pointToLayer} // Customize point markers
         />
       )}
     </>
