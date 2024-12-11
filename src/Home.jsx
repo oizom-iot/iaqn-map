@@ -7,7 +7,7 @@ import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger 
 import { Field } from '@/components/ui/field';
 import geojsonBounds from '@/constants/geojsonBounds.json';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import L from 'leaflet'; // Import Leaflet
 import AQIHeatmapLayer from './heatmap';
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
@@ -19,6 +19,58 @@ function preload(urls) {
     images[url].src = url;
   }
 }
+
+const geojsons = {}; // Global dictionary to store preloaded GeoJSON data
+
+// Preload GeoJSON files
+async function preloadGeoJSON(urls) {
+  for (const url of urls) {
+    if (!geojsons[url]) {
+      try {
+        const response = await fetch(url);
+        geojsons[url] = await response.json(); // Store parsed GeoJSON data
+      } catch (error) {
+        console.error(`Error preloading GeoJSON: ${url}`, error);
+        geojsons[url] = null; // Mark as failed to load
+      }
+    }
+  }
+}
+
+const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
+  const map = useMap(); // Access Leaflet map instance
+
+  useEffect(() => {
+    // Create a custom control button
+    const toggleButton = L.control({ position: 'topright' });
+
+    toggleButton.onAdd = function () {
+      const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+      div.style.backgroundColor = firemapsEnabled ? 'red' : 'gray';
+      div.style.color = 'white';
+      div.style.padding = '5px';
+      div.style.cursor = 'pointer';
+      div.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+
+      div.onclick = () => {
+        setFiremapsEnabled((prev) => !prev);
+        div.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+        div.style.backgroundColor = !firemapsEnabled ? 'red' : 'gray';
+      };
+
+      return div;
+    };
+
+    toggleButton.addTo(map);
+
+    return () => {
+      toggleButton.remove(); // Cleanup on unmount
+    };
+  }, [map, firemapsEnabled, setFiremapsEnabled]); // Depend on firemapsEnabled
+
+  return null; // No visible component
+};
+
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
@@ -27,15 +79,24 @@ const Home = () => {
   const [endDate, setEndDate] = useState('2024-12-01');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
+  const [firemaps, setFiremaps] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heatmapPlaying, setHeatmapPlaying] = useState(false);
   const [opacity, setOpacity] = useState(0.5);
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const map = useRef();
 
-
+  const generateFiremapUrls = (start, end, param = "fire") => {
+    const urls = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const formattedDate = d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      urls.push(`${s3BaseURL}/${param}/${formattedDate}.geojson`);
+    }
+    return urls;
+  };
   // Utility: Generate heatmap URLs based on the date range and selected parameter
   const generateHeatmapUrls = (start, end, param) => {
     const urls = [];
@@ -44,12 +105,6 @@ const Home = () => {
       urls.push(`${s3BaseURL}/${param}/${formattedDate}.png`);
     }
     return urls;
-  };
-
-  // Update heatmap overlay
-  const updateHeatmap = (index) => {
-    if (heatmaps.length === 0 || index >= heatmaps.length) return;
-    setCurrentIndex(index);
   };
 
   // Play/Pause heatmap animation
@@ -73,15 +128,23 @@ const Home = () => {
   };
 
   // Load heatmaps based on date range and parameter
-  const loadHeatmaps = () => {
+  const loadHeatmaps = async () => {
     if (!startDate || !endDate) {
       alert('Please select both start and end dates.');
       return;
     }
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const urls = generateHeatmapUrls(start, end, parameter);
-    setHeatmaps(urls);
+  
+    // Generate URLs for heatmaps and GeoJSON
+    const heatmapUrls = generateHeatmapUrls(start, end, parameter);
+    const firemapUrls = generateFiremapUrls(start, end);
+  
+    // Preload GeoJSON data
+    await preloadGeoJSON(firemapUrls);
+  
+    setHeatmaps(heatmapUrls);
+    setFiremaps(firemapUrls.map(url => geojsons[url])); // Pass preloaded data instead of URLs
     setCurrentIndex(0);
     setPopoverOpen(false);
     togglePlayPause();
@@ -138,6 +201,7 @@ const Home = () => {
           {heatmaps.length > 0 && polygonBounds && (
             <AQIHeatmapLayer 
               heatmaps={heatmaps}
+              firemaps={firemapsEnabled ? firemaps : []}
               currentIndex={currentIndex}
               polygonBounds={polygonBounds}
               opacity={opacity}
@@ -145,6 +209,10 @@ const Home = () => {
               transitionSteps={transitionSteps}
             />
           )}
+          <ToggleFiremapsControl
+            firemapsEnabled={firemapsEnabled}
+            setFiremapsEnabled={setFiremapsEnabled}
+          />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
