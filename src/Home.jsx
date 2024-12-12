@@ -79,7 +79,7 @@ const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const Home = () => {
   const [startDate, setStartDate] = useState('2024-10-15');
-  const [endDate, setEndDate] = useState('2024-12-15');
+  const [endDate, setEndDate] = useState('2024-12-01');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
