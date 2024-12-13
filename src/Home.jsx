@@ -78,7 +78,7 @@ const MapControl = ({
       parameterDiv.style.borderRadius = '8px';
       parameterDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
       parameterDiv.style.cursor = 'pointer';
-      parameterDiv.innerHTML = `<label style="color: white;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 5px; border-radius: 5px; background-color: #333; color: white; border: none;">${parametersList.map(item => `<option value="${item.value}" ${parameter === item.value ? 'selected' : ''}>${item.label}</option>`).join('')}</select>`;
+      parameterDiv.innerHTML = `<label style="color: white; margin-right: 10px;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 10px; border-radius: 5px; background-color: #333; color: white; border: none;">${parametersList.map(item => `<option value="${item.value}" ${parameter === item.value ? 'selected' : ''}>${item.label}</option>`).join('')}</select>`;
 
       parameterDiv.querySelector('select').onchange = (e) => {
         setParameter(e.target.value);
@@ -229,7 +229,7 @@ const Home = () => {
     preloadGeoJSON(firemapUrls, setFiremaps);
 
     // Start heatmap playback
-    togglePlayPause();  
+    // togglePlayPause();  
   };
 
   // Cleanup interval on component unmount
