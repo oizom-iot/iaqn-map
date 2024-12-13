@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Flex, Text, Button, VStack, Stack, HStack, createListCollection, Select, Switch } from '@chakra-ui/react';
-import { SelectContent, SelectItem, SelectLabel, SelectRoot, SelectTrigger, SelectValueText } from "@/components/ui/select"
 import { MapContainer, TileLayer, useMap, ImageOverlay, ZoomControl } from 'react-leaflet';
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
 import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
@@ -41,50 +40,21 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
   }
 };
 
-// const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
-//   const map = useMap(); // Access Leaflet map instance
-
-//   useEffect(() => {
-//     // Create a custom control button
-//     const toggleButton = L.control({ position: 'topright' });
-
-//     toggleButton.onAdd = function () {
-//       const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-//       div.style.backgroundColor = firemapsEnabled ? 'red' : 'gray';
-//       div.style.color = 'white';
-//       div.style.padding = '5px';
-//       div.style.cursor = 'pointer';
-//       div.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps'; 
-
-//       div.onclick = () => {
-//         setFiremapsEnabled((prev) => !prev);
-//         div.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
-//         div.style.backgroundColor = !firemapsEnabled ? 'red' : 'gray';
-//       };
-
-//       return div;
-//     };
-
-//     toggleButton.addTo(map);
-
-//     return () => {
-//       toggleButton.remove(); // Cleanup on unmount
-//     };
-//   }, [map, firemapsEnabled, setFiremapsEnabled]); // Depend on firemapsEnabled
-
-//   return null; // No visible component
-// };
-
-
 const MapControl = ({
-  currentParameter,
-  setCurrentParameter,
+  // currentParameter,
+  // setCurrentParameter,
+  parameter,
+  setParameter,
   firemapsEnabled, 
   setFiremapsEnabled, 
   stationsEnabled, 
   setStationsEnabled 
 }) => {
   const map = useMap(); // Access Leaflet map instance
+  const parametersList = [
+    { label: "PM 2.5", value: "pm25" },
+    { label: "PM 10", value: "pm10" },
+  ]
 
   useEffect(() => {
     // Create a custom control wrapper for the map controls
@@ -110,10 +80,9 @@ const MapControl = ({
       parameterDiv.style.borderRadius = '8px';
       parameterDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
       parameterDiv.style.cursor = 'pointer';
-      parameterDiv.innerHTML = `<label style="color: white;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 5px; border-radius: 5px; background-color: #333; color: white; border: none;">${['PM25', 'PM10'].map(param => `<option value="${param}" ${currentParameter === param ? 'selected' : ''}>${param}</option>`).join('')}</select>`;
+      parameterDiv.innerHTML = `<label style="color: white;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 5px; border-radius: 5px; background-color: #333; color: white; border: none;">${parametersList.map(item => `<option value="${item.value}" ${parameter === item.value ? 'selected' : ''}>${item.label}</option>`).join('')}</select>`;
 
       parameterDiv.querySelector('select').onchange = (e) => {
-        // setCurrentParameter(e.target.value);
         setParameter(e.target.value);
       };
 
@@ -136,7 +105,7 @@ const MapControl = ({
 
       // Stations Toggle Control
       const stationsDiv = L.DomUtil.create('div');
-      stationsDiv.style.backgroundColor = stationsEnabled ? '#1E90FF' : '#808080'; // Dodger Blue for enabled, Gray for disabled
+      stationsDiv.style.backgroundColor = stationsEnabled ? '#1E90FF' : '#808080';
       stationsDiv.style.color = 'white';
       stationsDiv.style.padding = '10px';
       stationsDiv.style.borderRadius = '8px';
@@ -165,8 +134,7 @@ const MapControl = ({
     return () => {
       controlWrapper.remove();
     };
-  // }, [map, currentParameter, firemapsEnabled, stationsEnabled, setCurrentParameter, setFiremapsEnabled, setStationsEnabled]);
-  }, [map, currentParameter, firemapsEnabled, stationsEnabled, setCurrentParameter, setFiremapsEnabled, setStationsEnabled]);
+  }, [map, parameter, setParameter, firemapsEnabled, stationsEnabled, setFiremapsEnabled, setStationsEnabled]);
 
   return null; // No visible React component, just Leaflet controls
 };
@@ -191,7 +159,6 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
-  const [currentParameter, setCurrentParameter] = useState([])
   const map = useRef();
 
   const generateFiremapUrls = (start, end, param = "fire") => {
@@ -202,13 +169,6 @@ const Home = () => {
     }
     return urls;
   };
-
-  const parameters = createListCollection({
-    items: [
-      { label: "PM 2.5", value: "PM25" },
-      { label: "PM 10", value: "PM10" },
-    ],
-  })
 
 
   const fetchStationsData = async () => {
@@ -338,13 +298,10 @@ const Home = () => {
               transitionSteps={transitionSteps}
             />
           )}
-          {/* <ToggleFiremapsControl
-            firemapsEnabled={firemapsEnabled}
-            setFiremapsEnabled={setFiremapsEnabled}
-          /> */}
+
           <MapControl 
-            currentParameter={currentParameter}
-            setCurrentParameter={setCurrentParameter}
+            parameter={parameter}
+            setParameter={setParameter}
             firemapsEnabled={firemapsEnabled}
             setFiremapsEnabled={setFiremapsEnabled}
             stationsEnabled={staionsEnabled}
@@ -373,14 +330,7 @@ const Home = () => {
           justifyContent="center"
           height={'fit-content'}
         >
-          {/* <MapControl 
-            currentParameter={currentParameter}
-            setCurrentParameter={setCurrentParameter}
-            firemapsEnabled={firemapsEnabled}
-            setFiremapsEnabled={setFiremapsEnabled}
-            stationsEnabled={staionsEnabled}
-            setStationsEnabled={setStationsEnabled}
-          /> */}
+
           <VStack width={'100%'} display={'flex'} gap={0}>
             <div className="slider-container">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', width: '100%' }}>
@@ -423,7 +373,7 @@ const Home = () => {
 
 
                 {/* Parameter Selector */}
-                <SelectRoot
+                {/* <SelectRoot
                   collection={parameters}
                   width="320px"
                   value={currentParameter}
@@ -439,7 +389,7 @@ const Home = () => {
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </SelectRoot>
+                </SelectRoot> */}
 
                 {/* Play/Pause Button */}
                 <div className="play-button">
