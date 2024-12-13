@@ -52,7 +52,7 @@ const AQIHeatmapLayer = ({
     const marker = L.marker(latlng, {
       icon: L.icon({
         iconUrl: 'src/assets/fire.png',
-        iconSize: [32, 32],
+        iconSize: [15, 15],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
         shadowUrl: null,
@@ -67,8 +67,8 @@ const AQIHeatmapLayer = ({
         `Satellite: ${satellite || 'N/A'}<br>Brightness: ${brightness || 'N/A'}`, 
         {
           permanent: false, // Tooltip only shows on hover
-          direction: 'top', // Position of the tooltip relative to the marker
-          offset: [0, -10] // Adjust tooltip position
+          direction: 'top', 
+          offset: [0, -10] 
         }
       );
     }
