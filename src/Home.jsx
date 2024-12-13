@@ -15,8 +15,10 @@ const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with you
 const images = {};
 function preload(urls) {
   for (const url of urls) {
-    images[url] = new Image();
-    images[url].src = url;
+    if (!images[url]) {
+      images[url] = new Image();
+      images[url].src = url;
+    }
   }
 }
 
@@ -43,100 +45,79 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
 const MapControl = ({
   parameter,
   setParameter,
-  firemapsEnabled, 
-  setFiremapsEnabled, 
-  stationsEnabled, 
-  setStationsEnabled 
+  firemapsEnabled,
+  setFiremapsEnabled,
+  stationsEnabled,
+  setStationsEnabled,
 }) => {
   const map = useMap(); // Access Leaflet map instance
+
   const parametersList = [
     { label: "PM 2.5", value: "pm25" },
     { label: "PM 10", value: "pm10" },
-  ]
+  ];
 
-  useEffect(() => {
-    // Create a custom control wrapper for the map controls
-    const controlWrapper = L.control({ position: 'topright' });
+  // Handle firemaps and stations toggle
+  const toggleFiremaps = () => setFiremapsEnabled(prev => !prev);
+  const toggleStations = () => setStationsEnabled(prev => !prev);
 
-    controlWrapper.onAdd = function () {
-      const wrapperDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-      
-      // Dark theme styling for the wrapper to create rounded borders
-      wrapperDiv.style.backgroundColor = '#2D2D2D'; // Dark background
-      wrapperDiv.style.borderRadius = '12px';
-      wrapperDiv.style.padding = '10px';
-      wrapperDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-      wrapperDiv.style.display = 'flex';
-      wrapperDiv.style.flexDirection = 'column';
-      wrapperDiv.style.gap = '10px';
+  return (
+    <Box
+      p={4}
+      bg="gray.800"
+      borderRadius="lg"
+      boxShadow="lg"
+      display="flex"
+      flexDirection="column"
+      gap={4}
+      position="absolute"
+      top="10px"
+      right="10px"
+      zIndex="1000"
+    >
+      {/* Parameter Dropdown */}
+      <select
+        value={parameter}
+        onChange={(e) => setParameter(e.target.value)}
+        bg="gray.600"
+        color="white"
+        style={{ cursor: "pointer", padding: "0.5rem", borderRadius: "0.25rem", border: "none", outline: "none" }}
+      >
+        {parametersList.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
 
-      // Parameter Dropdown Control
-      const parameterDiv = L.DomUtil.create('div');
-      parameterDiv.style.backgroundColor = '#444'; // Dark background for dropdown
-      parameterDiv.style.color = 'white'; // White text for contrast
-      parameterDiv.style.padding = '10px';
-      parameterDiv.style.borderRadius = '8px';
-      parameterDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-      parameterDiv.style.cursor = 'pointer';
-      parameterDiv.innerHTML = `<label style="color: white; margin-right: 10px;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 10px; border-radius: 5px; background-color: #333; color: white; border: none;">${parametersList.map(item => `<option value="${item.value}" ${parameter === item.value ? 'selected' : ''}>${item.label}</option>`).join('')}</select>`;
+      {/* Firemaps Toggle */}
+      <Button
+        onClick={toggleFiremaps}
+        bg={firemapsEnabled ? "#FF6347" : "#808080"}
+        color="white"
+        w="full"
+        borderRadius="md"
+        fontWeight="bold"
+      >
+        {firemapsEnabled ? "Disable Firemaps" : "Enable Firemaps"}
+      </Button>
 
-      parameterDiv.querySelector('select').onchange = (e) => {
-        setParameter(e.target.value);
-      };
-
-      // Firemaps Toggle Control
-      const firemapsDiv = L.DomUtil.create('div');
-      firemapsDiv.style.backgroundColor = firemapsEnabled ? '#FF6347' : '#808080'; // Tomato Red for enabled, Gray for disabled
-      firemapsDiv.style.color = 'white';
-      firemapsDiv.style.padding = '10px';
-      firemapsDiv.style.borderRadius = '8px';
-      firemapsDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-      firemapsDiv.style.cursor = 'pointer';
-      firemapsDiv.style.fontWeight = 'bold';
-      firemapsDiv.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
-
-      firemapsDiv.onclick = () => {
-        setFiremapsEnabled((prev) => !prev);
-        firemapsDiv.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
-        firemapsDiv.style.backgroundColor = !firemapsEnabled ? '#FF6347' : '#808080'; // Update color
-      };
-
-      // Stations Toggle Control
-      const stationsDiv = L.DomUtil.create('div');
-      stationsDiv.style.backgroundColor = stationsEnabled ? '#1E90FF' : '#808080';
-      stationsDiv.style.color = 'white';
-      stationsDiv.style.padding = '10px';
-      stationsDiv.style.borderRadius = '8px';
-      stationsDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-      stationsDiv.style.cursor = 'pointer';
-      stationsDiv.style.fontWeight = 'bold';
-      stationsDiv.innerHTML = stationsEnabled ? 'Disable Stations' : 'Enable Stations';
-
-      stationsDiv.onclick = () => {
-        setStationsEnabled((prev) => !prev);
-        stationsDiv.innerHTML = !stationsEnabled ? 'Disable Stations' : 'Enable Stations';
-        stationsDiv.style.backgroundColor = !stationsEnabled ? '#1E90FF' : '#808080'; // Update color
-      };
-
-      // Append controls to the wrapper div
-      wrapperDiv.appendChild(parameterDiv);
-      wrapperDiv.appendChild(firemapsDiv);
-      wrapperDiv.appendChild(stationsDiv);
-
-      return wrapperDiv;
-    };
-
-    controlWrapper.addTo(map);
-
-    // Cleanup on unmount
-    return () => {
-      controlWrapper.remove();
-    };
-  }, [map, parameter, setParameter, firemapsEnabled, stationsEnabled, setFiremapsEnabled, setStationsEnabled]);
-
-  return null; // No visible React component, just Leaflet controls
+      {/* Stations Toggle */}
+      <Box>
+        <Button
+          onClick={toggleStations}
+          bg={stationsEnabled ? "#1E90FF" : "#808080"}
+          color="white"
+          w="full"
+          borderRadius="md"
+          fontWeight="bold"
+        >
+          {stationsEnabled ? "Disable Stations" : "Enable Stations"}
+        </Button>
+      </Box>
+    </Box>
+  );
 };
-
 
 
 const playSpeedMs = 1000;

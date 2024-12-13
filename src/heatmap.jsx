@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ImageOverlay, GeoJSON } from 'react-leaflet';
+import { ImageOverlay, GeoJSON, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet'; // Import Leaflet for marker customization
-
+import { FireIcon } from './assets/assets';
 const AQIHeatmapLayer = ({ 
   heatmaps, 
   firemaps,
@@ -49,13 +49,17 @@ const AQIHeatmapLayer = ({
   }, [currentIndex, heatmaps, transitionSteps, transitionIntervalInMs, transitionStage.currentImage]);
 
   const firePointToLayer = (feature, latlng) => {
-    const marker = L.circleMarker(latlng, {
-      radius: 5, // Adjust marker size
-      fillColor: "green", // Marker color
-      color: "transparent", // Remove border by making it transparent
-      fillOpacity: 0.3 // Fill opacity
+    const marker = L.marker(latlng, {
+      icon: L.icon({
+        iconUrl: 'src/assets/fire.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+        shadowUrl: null,
+        shadowSize: [0, 0]
+      })
     });
-  
+    
     // Add tooltip to the marker
     if (feature.properties) {
       const { satellite, brightness } = feature.properties; // Extract desired properties
@@ -68,8 +72,9 @@ const AQIHeatmapLayer = ({
         }
       );
     }
-  
+    
     return marker;
+    
   };
   const stationPointToLayer = (feature, latlng) => {
     const marker = L.circleMarker(latlng, {
