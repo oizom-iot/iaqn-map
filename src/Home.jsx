@@ -50,7 +50,7 @@ const MapControl = ({
   stationsEnabled,
   setStationsEnabled,
 }) => {
-  const map = useMap(); // Access Leaflet map instance
+  // const map = useMap(); // Access Leaflet map instance
 
   const parametersList = [
     { label: "PM 2.5", value: "pm25" },
@@ -125,12 +125,12 @@ const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const Home = () => {
   const [startDate, setStartDate] = useState('2024-10-15');
-  const [endDate, setEndDate] = useState('2024-12-15');
+  const [endDate, setEndDate] = useState('2024-12-01');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
   const [staions, setStaions] = useState([]);
-  const [staionsEnabled, setStationsEnabled] = useState(true);
+  const [staionsEnabled, setStationsEnabled] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heatmapPlaying, setHeatmapPlaying] = useState(false);
   const [opacity, setOpacity] = useState(0.6);
@@ -139,7 +139,10 @@ const Home = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const map = useRef();
-
+  firemaps.forEach((firemap) => {
+    firemap._uniqueId ??= crypto.randomUUID()
+  })
+  staions._uniqueId ??= crypto.randomUUID()
   const generateFiremapUrls = (start, end, param = "fire") => {
     const urls = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
@@ -160,6 +163,7 @@ const Home = () => {
   }
   // Utility: Generate heatmap URLs based on the date range and selected parameter
   const generateHeatmapUrls = (start, end, param) => {
+    
     const urls = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const formattedDate = d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
@@ -208,11 +212,11 @@ const Home = () => {
     // Start GeoJSON preloading in the background
     // Start GeoJSON preloading in the background with incremental updates
     preloadGeoJSON(firemapUrls, setFiremaps);
-
+    
     // Start heatmap playback
     // togglePlayPause();  
   };
-
+  
   // Cleanup interval on component unmount
   useEffect(() => {
     // Add custom zoom control at the bottom right
@@ -268,7 +272,7 @@ const Home = () => {
             subdomains="iaqn.org"
             zIndex={0}
           />
-          {heatmaps.length > 0 && polygonBounds && (
+          {heatmaps.length && polygonBounds && (
             <AQIHeatmapLayer 
               heatmaps={heatmaps}
               firemaps={firemapsEnabled ? firemaps : []}
