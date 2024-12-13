@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Flex, Text, Button, VStack, Stack, HStack } from '@chakra-ui/react';
+import { Box, Flex, Text, Button, VStack, Stack, HStack, createListCollection, Select, Switch } from '@chakra-ui/react';
+import { SelectContent, SelectItem, SelectLabel, SelectRoot, SelectTrigger, SelectValueText } from "@/components/ui/select"
 import { MapContainer, TileLayer, useMap, ImageOverlay, ZoomControl } from 'react-leaflet';
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
 import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
@@ -40,49 +41,149 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
   }
 };
 
-const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
+// const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
+//   const map = useMap(); // Access Leaflet map instance
+
+//   useEffect(() => {
+//     // Create a custom control button
+//     const toggleButton = L.control({ position: 'topright' });
+
+//     toggleButton.onAdd = function () {
+//       const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+//       div.style.backgroundColor = firemapsEnabled ? 'red' : 'gray';
+//       div.style.color = 'white';
+//       div.style.padding = '5px';
+//       div.style.cursor = 'pointer';
+//       div.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps'; 
+
+//       div.onclick = () => {
+//         setFiremapsEnabled((prev) => !prev);
+//         div.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+//         div.style.backgroundColor = !firemapsEnabled ? 'red' : 'gray';
+//       };
+
+//       return div;
+//     };
+
+//     toggleButton.addTo(map);
+
+//     return () => {
+//       toggleButton.remove(); // Cleanup on unmount
+//     };
+//   }, [map, firemapsEnabled, setFiremapsEnabled]); // Depend on firemapsEnabled
+
+//   return null; // No visible component
+// };
+
+
+const MapControl = ({
+  currentParameter,
+  setCurrentParameter,
+  firemapsEnabled, 
+  setFiremapsEnabled, 
+  stationsEnabled, 
+  setStationsEnabled 
+}) => {
   const map = useMap(); // Access Leaflet map instance
 
   useEffect(() => {
-    // Create a custom control button
-    const toggleButton = L.control({ position: 'topright' });
+    // Create a custom control wrapper for the map controls
+    const controlWrapper = L.control({ position: 'topright' });
 
-    toggleButton.onAdd = function () {
-      const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-      div.style.backgroundColor = firemapsEnabled ? 'red' : 'gray';
-      div.style.color = 'white';
-      div.style.padding = '5px';
-      div.style.cursor = 'pointer';
-      div.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+    controlWrapper.onAdd = function () {
+      const wrapperDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+      
+      // Dark theme styling for the wrapper to create rounded borders
+      wrapperDiv.style.backgroundColor = '#2D2D2D'; // Dark background
+      wrapperDiv.style.borderRadius = '12px';
+      wrapperDiv.style.padding = '10px';
+      wrapperDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+      wrapperDiv.style.display = 'flex';
+      wrapperDiv.style.flexDirection = 'column';
+      wrapperDiv.style.gap = '10px';
 
-      div.onclick = () => {
-        setFiremapsEnabled((prev) => !prev);
-        div.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
-        div.style.backgroundColor = !firemapsEnabled ? 'red' : 'gray';
+      // Parameter Dropdown Control
+      const parameterDiv = L.DomUtil.create('div');
+      parameterDiv.style.backgroundColor = '#444'; // Dark background for dropdown
+      parameterDiv.style.color = 'white'; // White text for contrast
+      parameterDiv.style.padding = '10px';
+      parameterDiv.style.borderRadius = '8px';
+      parameterDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+      parameterDiv.style.cursor = 'pointer';
+      parameterDiv.innerHTML = `<label style="color: white;">Select Parameter: </label><select class="parameter-dropdown" style="padding: 5px; border-radius: 5px; background-color: #333; color: white; border: none;">${['PM25', 'PM10'].map(param => `<option value="${param}" ${currentParameter === param ? 'selected' : ''}>${param}</option>`).join('')}</select>`;
+
+      parameterDiv.querySelector('select').onchange = (e) => {
+        // setCurrentParameter(e.target.value);
+        setParameter(e.target.value);
       };
 
-      return div;
+      // Firemaps Toggle Control
+      const firemapsDiv = L.DomUtil.create('div');
+      firemapsDiv.style.backgroundColor = firemapsEnabled ? '#FF6347' : '#808080'; // Tomato Red for enabled, Gray for disabled
+      firemapsDiv.style.color = 'white';
+      firemapsDiv.style.padding = '10px';
+      firemapsDiv.style.borderRadius = '8px';
+      firemapsDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+      firemapsDiv.style.cursor = 'pointer';
+      firemapsDiv.style.fontWeight = 'bold';
+      firemapsDiv.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+
+      firemapsDiv.onclick = () => {
+        setFiremapsEnabled((prev) => !prev);
+        firemapsDiv.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+        firemapsDiv.style.backgroundColor = !firemapsEnabled ? '#FF6347' : '#808080'; // Update color
+      };
+
+      // Stations Toggle Control
+      const stationsDiv = L.DomUtil.create('div');
+      stationsDiv.style.backgroundColor = stationsEnabled ? '#1E90FF' : '#808080'; // Dodger Blue for enabled, Gray for disabled
+      stationsDiv.style.color = 'white';
+      stationsDiv.style.padding = '10px';
+      stationsDiv.style.borderRadius = '8px';
+      stationsDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+      stationsDiv.style.cursor = 'pointer';
+      stationsDiv.style.fontWeight = 'bold';
+      stationsDiv.innerHTML = stationsEnabled ? 'Disable Stations' : 'Enable Stations';
+
+      stationsDiv.onclick = () => {
+        setStationsEnabled((prev) => !prev);
+        stationsDiv.innerHTML = !stationsEnabled ? 'Disable Stations' : 'Enable Stations';
+        stationsDiv.style.backgroundColor = !stationsEnabled ? '#1E90FF' : '#808080'; // Update color
+      };
+
+      // Append controls to the wrapper div
+      wrapperDiv.appendChild(parameterDiv);
+      wrapperDiv.appendChild(firemapsDiv);
+      wrapperDiv.appendChild(stationsDiv);
+
+      return wrapperDiv;
     };
 
-    toggleButton.addTo(map);
+    controlWrapper.addTo(map);
 
+    // Cleanup on unmount
     return () => {
-      toggleButton.remove(); // Cleanup on unmount
+      controlWrapper.remove();
     };
-  }, [map, firemapsEnabled, setFiremapsEnabled]); // Depend on firemapsEnabled
+  // }, [map, currentParameter, firemapsEnabled, stationsEnabled, setCurrentParameter, setFiremapsEnabled, setStationsEnabled]);
+  }, [map, currentParameter, firemapsEnabled, stationsEnabled, setCurrentParameter, setFiremapsEnabled, setStationsEnabled]);
 
-  return null; // No visible component
+  return null; // No visible React component, just Leaflet controls
 };
+
+
 
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const Home = () => {
   const [startDate, setStartDate] = useState('2024-10-15');
-  const [endDate, setEndDate] = useState('2024-12-01');
+  const [endDate, setEndDate] = useState('2024-12-15');
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
+  const [staions, setStaions] = useState([]);
+  const [staionsEnabled, setStationsEnabled] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heatmapPlaying, setHeatmapPlaying] = useState(false);
   const [opacity, setOpacity] = useState(0.6);
@@ -90,6 +191,7 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
+  const [currentParameter, setCurrentParameter] = useState([])
   const map = useRef();
 
   const generateFiremapUrls = (start, end, param = "fire") => {
@@ -100,6 +202,23 @@ const Home = () => {
     }
     return urls;
   };
+
+  const parameters = createListCollection({
+    items: [
+      { label: "PM 2.5", value: "PM25" },
+      { label: "PM 10", value: "PM10" },
+    ],
+  })
+
+
+  const fetchStationsData = async () => {
+    const stationData = await fetch("src/constants/stations.geojson")
+    return stationData.json()
+  }
+  const initializeStations = async () => {
+    const stationsData = await fetchStationsData()
+    setStaions(stationsData.features)
+  }
   // Utility: Generate heatmap URLs based on the date range and selected parameter
   const generateHeatmapUrls = (start, end, param) => {
     const urls = [];
@@ -161,39 +280,14 @@ const Home = () => {
     const geojson = L.geoJSON(geojsonBounds);
     setPolygonBounds(geojson.getBounds());
     loadHeatmaps();
+
+
+    //loading stations data on mount
+    initializeStations()
     return () => {
       clearInterval(playIntervalRef.current);
     };
   }, []);
-
-  // Define the date range
-  const diwaliStartDate = new Date("2024-10-29");
-  const diwaliEndDate = new Date("2024-11-03");
-
-  // Function to check if the date falls within the range
-  const isDateInRange = (date) => {
-    return date >= diwaliStartDate && date <= diwaliEndDate;
-  };
-
-  // Extract the date from the heatmap filename and format it
-  const currentDateString = heatmaps[currentIndex]
-    ? new Date(heatmaps[currentIndex]?.split("/").pop()?.replace(".png", ""))
-    : null;
-
-  // Format the date for display
-  const formattedDate = currentDateString
-    ? currentDateString.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "--";
-
-  // Logic to append text if the date is within the range
-  const dateWithText =
-    currentDateString && isDateInRange(currentDateString)
-      ? `${formattedDate} (${"Diwali Week"})`
-      : formattedDate;
 
   preload(heatmaps);
   return (
@@ -236,6 +330,7 @@ const Home = () => {
             <AQIHeatmapLayer 
               heatmaps={heatmaps}
               firemaps={firemapsEnabled ? firemaps : []}
+              stations={staionsEnabled ? staions : []}
               currentIndex={currentIndex}
               polygonBounds={polygonBounds}
               opacity={opacity}
@@ -243,9 +338,17 @@ const Home = () => {
               transitionSteps={transitionSteps}
             />
           )}
-          <ToggleFiremapsControl
+          {/* <ToggleFiremapsControl
             firemapsEnabled={firemapsEnabled}
             setFiremapsEnabled={setFiremapsEnabled}
+          /> */}
+          <MapControl 
+            currentParameter={currentParameter}
+            setCurrentParameter={setCurrentParameter}
+            firemapsEnabled={firemapsEnabled}
+            setFiremapsEnabled={setFiremapsEnabled}
+            stationsEnabled={staionsEnabled}
+            setStationsEnabled={setStationsEnabled}
           />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
@@ -270,6 +373,14 @@ const Home = () => {
           justifyContent="center"
           height={'fit-content'}
         >
+          {/* <MapControl 
+            currentParameter={currentParameter}
+            setCurrentParameter={setCurrentParameter}
+            firemapsEnabled={firemapsEnabled}
+            setFiremapsEnabled={setFiremapsEnabled}
+            stationsEnabled={staionsEnabled}
+            setStationsEnabled={setStationsEnabled}
+          /> */}
           <VStack width={'100%'} display={'flex'} gap={0}>
             <div className="slider-container">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', width: '100%' }}>
@@ -310,6 +421,26 @@ const Home = () => {
                   </PopoverContent>
                 </PopoverRoot>
 
+
+                {/* Parameter Selector */}
+                <SelectRoot
+                  collection={parameters}
+                  width="320px"
+                  value={currentParameter}
+                  onValueChange={(e) => {setCurrentParameter(e.value); console.log(e.value)}}
+                >
+                  <SelectTrigger>
+                    <SelectValueText placeholder="Select parameter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parameters.items.map((param) => (
+                      <SelectItem item={param} key={param.value}>
+                        {param.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </SelectRoot>
+
                 {/* Play/Pause Button */}
                 <div className="play-button">
                   <Button
@@ -326,9 +457,7 @@ const Home = () => {
 
                 {/* Slider */}
                 <div style={{ width: '100%', marginRight: '0.5rem' }}>
-                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'>
-                    {dateWithText}
-                  </div>
+                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'> {new Date(heatmaps[currentIndex]?.split('/').pop()?.replace('.png', '')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || '--'}</div>
                   <input
                     type="range"
                     min="0"

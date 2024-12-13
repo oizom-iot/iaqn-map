@@ -4,7 +4,8 @@ import L from 'leaflet'; // Import Leaflet for marker customization
 
 const AQIHeatmapLayer = ({ 
   heatmaps, 
-  firemaps, 
+  firemaps,
+  stations,
   currentIndex, 
   polygonBounds, 
   opacity,
@@ -47,10 +48,10 @@ const AQIHeatmapLayer = ({
     }
   }, [currentIndex, heatmaps, transitionSteps, transitionIntervalInMs, transitionStage.currentImage]);
 
-  const pointToLayer = (feature, latlng) => {
+  const firePointToLayer = (feature, latlng) => {
     const marker = L.circleMarker(latlng, {
-      radius: 3, // Adjust marker size
-      fillColor: "red", // Marker color
+      radius: 5, // Adjust marker size
+      fillColor: "green", // Marker color
       color: "transparent", // Remove border by making it transparent
       fillOpacity: 0.3 // Fill opacity
     });
@@ -70,6 +71,30 @@ const AQIHeatmapLayer = ({
   
     return marker;
   };
+  const stationPointToLayer = (feature, latlng) => {
+    const marker = L.circleMarker(latlng, {
+      radius: 5, // Adjust marker size
+      fillColor: "blue", // Marker color
+      color: "transparent", // Remove border by making it transparent
+      fillOpacity: 0.3 // Fill opacity
+    });
+  
+    // Add tooltip to the marker
+    if (feature.properties) {
+      const { properties, geometry } = feature; // Extract desired properties
+      marker.bindTooltip(
+        `Station: ${properties.name || 'N/A'}<br>Lattitude: ${geometry.coordinates[0] || 'N/A'}<br>Longitude: ${geometry.coordinates[1]}`, 
+        {
+          permanent: false, // Tooltip only shows on hover
+          direction: 'top', // Position of the tooltip relative to the marker
+          offset: [0, -10] // Adjust tooltip position
+        }
+      );
+    }
+  
+    return marker;
+  };
+  
 
   return (
     <>
@@ -78,7 +103,14 @@ const AQIHeatmapLayer = ({
         <GeoJSON
           key={currentIndex} // Force re-render when currentIndex changes
           data={firemaps[currentIndex]} // Use preloaded GeoJSON data
-          pointToLayer={pointToLayer} // Customize point markers
+          pointToLayer={firePointToLayer} // Customize point markers
+        />
+      )}
+      {stations && (
+        <GeoJSON
+          key={stations.length} // Force re-render when number of stations changes
+          data={stations} // Use preloaded GeoJSON data
+          pointToLayer={stationPointToLayer} // Customize point markers
         />
       )}
       {/* Transitioning Image Overlay */}
