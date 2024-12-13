@@ -41,8 +41,6 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
 };
 
 const MapControl = ({
-  // currentParameter,
-  // setCurrentParameter,
   parameter,
   setParameter,
   firemapsEnabled, 
@@ -239,7 +237,6 @@ const Home = () => {
     // Add custom zoom control at the bottom right
     const geojson = L.geoJSON(geojsonBounds);
     setPolygonBounds(geojson.getBounds());
-    loadHeatmaps();
 
 
     //loading stations data on mount
@@ -248,6 +245,10 @@ const Home = () => {
       clearInterval(playIntervalRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    loadHeatmaps();
+  }, [parameter]);
 
   preload(heatmaps);
   return (
