@@ -324,11 +324,34 @@ const Home = () => {
         alignItems="center"
         className='header'
       >
-        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
-        <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
-        onClick={() => {setOnboarding(!onboarding); console.log("first")}}>
+        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchPriority="high" />
+        <Stack
+    direction={['column', 'row']} // Vertical on mobile, horizontal on larger screens
+    spacing="1rem"
+    alignItems="center"
+  >
+    <Button
+      bg="black"
+      color="white"
+      border="none"
+      variant="outline"
+      onClick={() => {setOnboarding(!onboarding); console.log("first")}}
+    >
+      Quick Guide
+    </Button>
+    <Button
+      bg="black"
+      color="white"
+      border="none"
+      variant="outline"
+    >
+      How To?
+    </Button>
+  </Stack>
+        {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
+        >
           How To?
-        </Button>
+        </Button> */}
       </Box>
 
       {/* Map */}
