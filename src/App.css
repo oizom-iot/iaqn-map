@@ -43,6 +43,14 @@ body {
   outline: none;
 }
 
+.calender-button {
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  cursor: pointer;
+  align-self: flex-start;
+  margin: 4px 0;
+}
+
 .play-button {
   mask-size: contain;
   -webkit-mask-size: contain;

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ImageOverlay, GeoJSON } from 'react-leaflet';
+import { ImageOverlay, GeoJSON, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet'; // Import Leaflet for marker customization
-
+import { FireIcon } from './assets/assets';
 const AQIHeatmapLayer = ({ 
   heatmaps, 
-  firemaps, 
+  firemaps,
+  stations,
   currentIndex, 
   polygonBounds, 
   opacity,
@@ -47,14 +48,18 @@ const AQIHeatmapLayer = ({
     }
   }, [currentIndex, heatmaps, transitionSteps, transitionIntervalInMs, transitionStage.currentImage]);
 
-  const pointToLayer = (feature, latlng) => {
-    const marker = L.circleMarker(latlng, {
-      radius: 3, // Adjust marker size
-      fillColor: "red", // Marker color
-      color: "transparent", // Remove border by making it transparent
-      fillOpacity: 0.3 // Fill opacity
+  const firePointToLayer = (feature, latlng) => {
+    const marker = L.marker(latlng, {
+      icon: L.icon({
+        iconUrl: 'src/assets/fire.png',
+        iconSize: [15, 15],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+        shadowUrl: null,
+        shadowSize: [0, 0]
+      })
     });
-  
+    
     // Add tooltip to the marker
     if (feature.properties) {
       const { satellite, brightness } = feature.properties; // Extract desired properties
@@ -62,23 +67,57 @@ const AQIHeatmapLayer = ({
         `Satellite: ${satellite || 'N/A'}<br>Brightness: ${brightness || 'N/A'}`, 
         {
           permanent: false, // Tooltip only shows on hover
-          direction: 'top', // Position of the tooltip relative to the marker
-          offset: [0, -10] // Adjust tooltip position
+          direction: 'top', 
+          offset: [0, -10] 
+        }
+      );
+    }
+    
+    return marker;
+    
+  };
+  const stationPointToLayer = (feature, latlng) => {
+    const marker = L.marker(latlng, {
+      icon: L.icon({
+        iconUrl: 'src/assets/circle.png',
+        iconSize: [20, 20 ],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+        shadowUrl: null,
+        shadowSize: [0, 0]
+      })
+    });
+  
+    
+    if (feature.properties) {
+      const { properties, geometry } = feature; // Extract desired properties
+      marker.bindTooltip(
+        `Station: ${properties.name || 'N/A'}<br>Lattitude: ${geometry.coordinates[0] || 'N/A'}<br>Longitude: ${geometry.coordinates[1]}`, 
+        {
+          permanent: false, // Tooltip only shows on hover
+          direction: 'top', 
+          offset: [0, -10]
         }
       );
     }
   
     return marker;
   };
-
   return (
     <>
       {/* Render GeoJSON layer with custom markers */}
       {firemaps[currentIndex] && (
         <GeoJSON
-          key={currentIndex} // Force re-render when currentIndex changes
-          data={firemaps[currentIndex]} // Use preloaded GeoJSON data
-          pointToLayer={pointToLayer} // Customize point markers
+          key={firemaps[currentIndex]._uniqueId}
+          data={firemaps[currentIndex]}
+          pointToLayer={firePointToLayer}
+        />
+      )}
+      {stations && (
+        <GeoJSON
+          key={stations._uniqueId}
+          data={stations}
+          pointToLayer={stationPointToLayer} // 
         />
       )}
       {/* Transitioning Image Overlay */}

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Flex, Text, Button, VStack, Stack, HStack } from '@chakra-ui/react';
+import { Box, Flex, Text, Button, VStack, Stack, HStack, createListCollection, Select, Switch } from '@chakra-ui/react';
 import { MapContainer, TileLayer, useMap, ImageOverlay, ZoomControl } from 'react-leaflet';
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
 import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
@@ -9,14 +9,17 @@ import geojsonBounds from '@/constants/geojsonBounds.json';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet'; // Import Leaflet
 import AQIHeatmapLayer from './heatmap';
+import Joyride from 'react-joyride';
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
 const images = {};
 function preload(urls) {
   for (const url of urls) {
-    images[url] = new Image();
-    images[url].src = url;
+    if (!images[url]) {
+      images[url] = new Image();
+      images[url].src = url;
+    }
   }
 }
 
@@ -40,39 +43,84 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
   }
 };
 
-const ToggleFiremapsControl = ({ firemapsEnabled, setFiremapsEnabled }) => {
-  const map = useMap(); // Access Leaflet map instance
+const MapControl = ({
+  parameter,
+  setParameter,
+  firemapsEnabled,
+  setFiremapsEnabled,
+  stationsEnabled,
+  setStationsEnabled,
+}) => {
+  // const map = useMap(); // Access Leaflet map instance
 
-  useEffect(() => {
-    // Create a custom control button
-    const toggleButton = L.control({ position: 'topright' });
+  const parametersList = [
+    { label: "PM 2.5", value: "pm25" },
+    { label: "PM 10", value: "pm10" },
+  ];
 
-    toggleButton.onAdd = function () {
-      const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-      div.style.backgroundColor = firemapsEnabled ? 'red' : 'gray';
-      div.style.color = 'white';
-      div.style.padding = '5px';
-      div.style.cursor = 'pointer';
-      div.innerHTML = firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
+  // Handle firemaps and stations toggle
+  const toggleFiremaps = () => setFiremapsEnabled(prev => !prev);
+  const toggleStations = () => setStationsEnabled(prev => !prev);
 
-      div.onclick = () => {
-        setFiremapsEnabled((prev) => !prev);
-        div.innerHTML = !firemapsEnabled ? 'Disable Firemaps' : 'Enable Firemaps';
-        div.style.backgroundColor = !firemapsEnabled ? 'red' : 'gray';
-      };
+  return (
+    <Box
+      p={4}
+      bg="gray.800"
+      borderRadius="lg"
+      boxShadow="lg"
+      display="flex"
+      flexDirection="column"
+      gap={4}
+      position="absolute"
+      top="10px"
+      right="10px"
+      zIndex="1000"
+      className="map-control"
+    >
+      {/* Parameter Dropdown */}
+      <select
+        value={parameter}
+        onChange={(e) => setParameter(e.target.value)}
+        bg="gray.600"
+        color="white"
+        style={{ cursor: "pointer", padding: "0.5rem", borderRadius: "0.25rem", border: "none", outline: "none" }}
+      >
+        {parametersList.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
 
-      return div;
-    };
+      {/* Firemaps Toggle */}
+      <Button
+        onClick={toggleFiremaps}
+        bg={firemapsEnabled ? "#FF6347" : "#808080"}
+        color="white"
+        w="full"
+        borderRadius="md"
+        fontWeight="bold"
+      >
+        {firemapsEnabled ? "Disable Firemaps" : "Enable Firemaps"}
+      </Button>
 
-    toggleButton.addTo(map);
-
-    return () => {
-      toggleButton.remove(); // Cleanup on unmount
-    };
-  }, [map, firemapsEnabled, setFiremapsEnabled]); // Depend on firemapsEnabled
-
-  return null; // No visible component
+      {/* Stations Toggle */}
+      <Box>
+        <Button
+          onClick={toggleStations}
+          bg={stationsEnabled ? "#1E90FF" : "#808080"}
+          color="white"
+          w="full"
+          borderRadius="md"
+          fontWeight="bold"
+        >
+          {stationsEnabled ? "Disable Stations" : "Enable Stations"}
+        </Button>
+      </Box>
+    </Box>
+  );
 };
+
 
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
@@ -83,6 +131,8 @@ const Home = () => {
   const [parameter, setParameter] = useState('pm25');
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
+  const [staions, setStaions] = useState([]);
+  const [staionsEnabled, setStationsEnabled] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heatmapPlaying, setHeatmapPlaying] = useState(false);
   const [opacity, setOpacity] = useState(0.6);
@@ -90,8 +140,13 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
-  const map = useRef();
+  const [onboarding, setOnboarding] = useState(true);
 
+  const map = useRef();
+  firemaps.forEach((firemap) => {
+    firemap._uniqueId ??= crypto.randomUUID()
+  })
+  staions._uniqueId ??= crypto.randomUUID()
   const generateFiremapUrls = (start, end, param = "fire") => {
     const urls = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
@@ -100,8 +155,19 @@ const Home = () => {
     }
     return urls;
   };
+
+
+  const fetchStationsData = async () => {
+    const stationData = await fetch("src/constants/stations.geojson")
+    return stationData.json()
+  }
+  const initializeStations = async () => {
+    const stationsData = await fetchStationsData()
+    setStaions(stationsData.features)
+  }
   // Utility: Generate heatmap URLs based on the date range and selected parameter
   const generateHeatmapUrls = (start, end, param) => {
+    
     const urls = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const formattedDate = d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
@@ -150,54 +216,101 @@ const Home = () => {
     // Start GeoJSON preloading in the background
     // Start GeoJSON preloading in the background with incremental updates
     preloadGeoJSON(firemapUrls, setFiremaps);
-
+    
     // Start heatmap playback
-    togglePlayPause();  
+    // togglePlayPause();  
   };
-
+  
   // Cleanup interval on component unmount
   useEffect(() => {
     // Add custom zoom control at the bottom right
     const geojson = L.geoJSON(geojsonBounds);
     setPolygonBounds(geojson.getBounds());
-    loadHeatmaps();
+
+
+    //loading stations data on mount
+    initializeStations()
     return () => {
       clearInterval(playIntervalRef.current);
     };
   }, []);
 
-  // Define the date range
-  const diwaliStartDate = new Date("2024-10-29");
-  const diwaliEndDate = new Date("2024-11-03");
-
-  // Function to check if the date falls within the range
-  const isDateInRange = (date) => {
-    return date >= diwaliStartDate && date <= diwaliEndDate;
-  };
-
-  // Extract the date from the heatmap filename and format it
-  const currentDateString = heatmaps[currentIndex]
-    ? new Date(heatmaps[currentIndex]?.split("/").pop()?.replace(".png", ""))
-    : null;
-
-  // Format the date for display
-  const formattedDate = currentDateString
-    ? currentDateString.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "--";
-
-  // Logic to append text if the date is within the range
-  const dateWithText =
-    currentDateString && isDateInRange(currentDateString)
-      ? `${formattedDate} (${"Diwali Week"})`
-      : formattedDate;
+  useEffect(() => {
+    loadHeatmaps();
+  }, [parameter]);
 
   preload(heatmaps);
+
+  
+  
+  const defaultOptions = {
+    arrowColor: '#fff',
+    backgroundColor: '#fff',
+    beaconSize: 36,
+    overlayColor: 'rgba(0, 0, 0, 0.5)',
+    primaryColor: '#f04',
+    spotlightShadow: '0 0 15px rgba(0, 0, 0, 0.5)',
+    textColor: '#333',
+    width: undefined,
+    zIndex: 2000,
+    // position: 'center'
+  };
   return (
-    <Flex direction="column" height="100vh" width="100vw">
+    <Flex direction="column" height="100vh" width="100vw" className='home'>
+      <Joyride
+      steps = {[
+        {
+          target: 'header',
+          content: <h2>Welcome to IAQN!</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'bottom',
+        },
+        {
+          target: '.map-wrapper',
+          content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          // placement: 'center',
+        },
+        {
+          target: '.map-control',
+          content: <h2>Customize your map settings to fit your needs—control parameters, enable/disable firemaps and stations layer.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'left',
+        },
+        {
+          target: '.slider-container',
+          content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'left',
+        },
+        {
+          target: '.calender-button',
+          content: <h2>Use Calender to view data on customize period.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+        },
+        {
+          target: '.play-button',
+          content: <h2>Use Play/Pause button to explore Maps in visulization.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+        },
+        {
+          target: '.home',
+          content: <h2>And that’s a wrap! You’re ready to explore our platform and make the most of it.</h2>,
+          locale: { skip: null, last: <strong>Finish 🎉</strong> },
+          placement: 'center',
+          hideEndButton: true,
+        }
+      ]}
+        run={onboarding}
+        continuous={true}
+        showSkipButton={true}
+        showProgress={true}
+        onStepChange={(data) => console.log('Step changed', data)}
+        onFinish={() => console.log('Tour finished!')}
+        styles={{
+          options: defaultOptions,
+        }}
+      />
       {/* Top Toolbar */}
       <Box
         as="header"
@@ -209,15 +322,41 @@ const Home = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
+        className='header'
       >
-        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
-        <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}>
+        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchPriority="high" />
+        <Stack
+    direction={['column', 'row']} // Vertical on mobile, horizontal on larger screens
+    spacing="1rem"
+    alignItems="center"
+  >
+    <Button
+      bg="black"
+      color="white"
+      border="none"
+      variant="outline"
+      onClick={() => {setOnboarding(!onboarding); console.log("first")}}
+    >
+      Quick Guide
+    </Button>
+    <Button
+      bg="black"
+      color="white"
+      border="none"
+      variant="outline"
+    >
+      How To?
+    </Button>
+  </Stack>
+        {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
+        >
           How To?
-        </Button>
+        </Button> */}
       </Box>
 
       {/* Map */}
-      <Box display={'flex'} flex="1">
+      <Box display={'flex'} flex="1" className='map-wrapper'>
+
         <MapContainer
           center={[27.0, 80.0]}
           zoom={6}
@@ -225,28 +364,34 @@ const Home = () => {
           maxZoom={18}
           style={{ width: '100%', flexGrow: 1, display: 'flex' }}
           ref={map}
-        >
+          >
           <TileLayer
             url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             subdomains="iaqn.org"
             zIndex={0}
-          />
-          {heatmaps.length > 0 && polygonBounds && (
-            <AQIHeatmapLayer 
-              heatmaps={heatmaps}
-              firemaps={firemapsEnabled ? firemaps : []}
-              currentIndex={currentIndex}
-              polygonBounds={polygonBounds}
-              opacity={opacity}
-              transitionIntervalInMs={transitionTimeMs}
-              transitionSteps={transitionSteps}
             />
+          {heatmaps.length && polygonBounds && (
+              <AQIHeatmapLayer 
+                heatmaps={heatmaps}
+                firemaps={firemapsEnabled ? firemaps : []}
+                stations={staionsEnabled ? staions : []}
+                currentIndex={currentIndex}
+                polygonBounds={polygonBounds}
+                opacity={opacity}
+                transitionIntervalInMs={transitionTimeMs}
+                transitionSteps={transitionSteps}
+              />
           )}
-          <ToggleFiremapsControl
+
+          <MapControl 
+            parameter={parameter}
+            setParameter={setParameter}
             firemapsEnabled={firemapsEnabled}
             setFiremapsEnabled={setFiremapsEnabled}
-          />
+            stationsEnabled={staionsEnabled}
+            setStationsEnabled={setStationsEnabled}
+            />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -270,13 +415,14 @@ const Home = () => {
           justifyContent="center"
           height={'fit-content'}
         >
+
           <VStack width={'100%'} display={'flex'} gap={0}>
             <div className="slider-container">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', width: '100%' }}>
                 {/* Date Picker */}
                 <PopoverRoot open={popoverOpen} onOpenChange={(e) => setPopoverOpen(e.open)} positioning={{ placement: "top-end" }}>
                   <PopoverTrigger asChild>
-                    <div className="play-button">
+                    <div className="calender-button">
                       <Button onClick={() => { setPopoverOpen(true); heatmapPlaying && togglePlayPause(); }} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
                         <IoCalendar />
                       </Button>
@@ -310,6 +456,26 @@ const Home = () => {
                   </PopoverContent>
                 </PopoverRoot>
 
+
+                {/* Parameter Selector */}
+                {/* <SelectRoot
+                  collection={parameters}
+                  width="320px"
+                  value={currentParameter}
+                  onValueChange={(e) => {setCurrentParameter(e.value); console.log(e.value)}}
+                >
+                  <SelectTrigger>
+                    <SelectValueText placeholder="Select parameter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parameters.items.map((param) => (
+                      <SelectItem item={param} key={param.value}>
+                        {param.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </SelectRoot> */}
+
                 {/* Play/Pause Button */}
                 <div className="play-button">
                   <Button
@@ -326,9 +492,7 @@ const Home = () => {
 
                 {/* Slider */}
                 <div style={{ width: '100%', marginRight: '0.5rem' }}>
-                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'>
-                    {dateWithText}
-                  </div>
+                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'> {new Date(heatmaps[currentIndex]?.split('/').pop()?.replace('.png', '')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || '--'}</div>
                   <input
                     type="range"
                     min="0"
@@ -376,6 +540,7 @@ const Home = () => {
 
         </Box>
       </Box>
+    
     </Flex>
   );
 };
