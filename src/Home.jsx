@@ -9,6 +9,7 @@ import geojsonBounds from '@/constants/geojsonBounds.json';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet'; // Import Leaflet
 import AQIHeatmapLayer from './heatmap';
+import Joyride from 'react-joyride';
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
@@ -74,6 +75,7 @@ const MapControl = ({
       top="10px"
       right="10px"
       zIndex="1000"
+      className="map-control"
     >
       {/* Parameter Dropdown */}
       <select
@@ -138,6 +140,8 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
+  const [onboarding, setOnboarding] = useState(false);
+
   const map = useRef();
   firemaps.forEach((firemap) => {
     firemap._uniqueId ??= crypto.randomUUID()
@@ -236,6 +240,20 @@ const Home = () => {
   }, [parameter]);
 
   preload(heatmaps);
+  const steps = [
+      {
+          target: '.map-control',
+          content: "this is my first lil step"
+      },
+      // {
+      //     target: '.step2',
+      //     content: "a slighly big second step"
+      // },
+      // {
+      //     target: '.step2',
+      //     content: "a slighly big second step"
+      // },
+  ]
   return (
     <Flex direction="column" height="100vh" width="100vw">
       {/* Top Toolbar */}
@@ -251,7 +269,8 @@ const Home = () => {
         alignItems="center"
       >
         <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
-        <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}>
+        <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
+        onClick={() => {setOnboarding(!onboarding); console.log("first")}}>
           How To?
         </Button>
       </Box>
@@ -441,6 +460,28 @@ const Home = () => {
 
         </Box>
       </Box>
+
+      <Joyride
+        steps={steps}
+        run={onboarding}
+        continuous={true}
+        showSkipButton={true}
+        showProgress={true}
+        onStepChange={(data) => console.log('Step changed', data)}
+        onFinish={() => console.log('Tour finished!')}
+      />
+      {/* <button onClick={() => {setOnboarding(true); console.log("first")}}>Start Tour</button> */}
+      {/* <div style={{ position: 'relative', top: '0', left: '0', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="first-step" style={{ marginTop: '100px', color: 'black',  }}>
+          First step content.
+        </div>
+        <div className="second-step" style={{ marginTop: '100px', color: 'black' }}>
+          Second step content.
+        </div>
+        <div className="third-step" style={{ marginTop: '100px', color: 'black' }}>
+          Third step content.
+        </div>
+      </div> */}
     </Flex>
   );
 };
