@@ -140,7 +140,7 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
-  const [onboarding, setOnboarding] = useState(false);
+  const [onboarding, setOnboarding] = useState(true);
 
   const map = useRef();
   firemaps.forEach((firemap) => {
@@ -240,39 +240,8 @@ const Home = () => {
   }, [parameter]);
 
   preload(heatmaps);
-  const steps = [
-    {
-      target: 'header',
-      content: <h2>Welcome to IAQN!</h2>,
-      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
-      placement: 'bottom',
-    },
-    {
-      target: '.map-wrapper',
-      content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
-      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
-      placement: 'center',
-    },
-    {
-      target: '.map-control',
-      content: <h2>Customize your map settings to fit your needs—control parameters, layers, and more!</h2>,
-      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
-      placement: 'left',
-    },
-    {
-      target: '.slider-container',
-      content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
-      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
-      placement: 'left',
-    },
-    {
-      target: '.home',
-      content: <h2>And that’s a wrap! You’re ready to explore our platform and make the most of it.</h2>,
-      locale: { skip: null, last: <strong>Finish 🎉</strong> },
-      placement: 'center',
-      hideEndButton: true,
-    }
-  ]
+
+  
   
   const defaultOptions = {
     arrowColor: '#fff',
@@ -289,7 +258,49 @@ const Home = () => {
   return (
     <Flex direction="column" height="100vh" width="100vw" className='home'>
       <Joyride
-        steps={steps}
+      steps = {[
+        {
+          target: 'header',
+          content: <h2>Welcome to IAQN!</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'bottom',
+        },
+        {
+          target: '.map-wrapper',
+          content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          // placement: 'center',
+        },
+        {
+          target: '.map-control',
+          content: <h2>Customize your map settings to fit your needs—control parameters, enable/disable firemaps and stations layer.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'left',
+        },
+        {
+          target: '.slider-container',
+          content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          placement: 'left',
+        },
+        {
+          target: '.calender-button',
+          content: <h2>Use Calender to view data on customize period.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+        },
+        {
+          target: '.play-button',
+          content: <h2>Use Play/Pause button to explore Maps in visulization.</h2>,
+          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+        },
+        {
+          target: '.home',
+          content: <h2>And that’s a wrap! You’re ready to explore our platform and make the most of it.</h2>,
+          locale: { skip: null, last: <strong>Finish 🎉</strong> },
+          placement: 'center',
+          hideEndButton: true,
+        }
+      ]}
         run={onboarding}
         continuous={true}
         showSkipButton={true}
@@ -388,7 +399,7 @@ const Home = () => {
                 {/* Date Picker */}
                 <PopoverRoot open={popoverOpen} onOpenChange={(e) => setPopoverOpen(e.open)} positioning={{ placement: "top-end" }}>
                   <PopoverTrigger asChild>
-                    <div className="play-button">
+                    <div className="calender-button">
                       <Button onClick={() => { setPopoverOpen(true); heatmapPlaying && togglePlayPause(); }} padding={0} color={'white'} bg={'transparent'} outline={'none'} width={'1rem'}>
                         <IoCalendar />
                       </Button>
