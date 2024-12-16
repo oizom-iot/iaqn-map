@@ -241,21 +241,65 @@ const Home = () => {
 
   preload(heatmaps);
   const steps = [
-      {
-          target: '.map-control',
-          content: "this is my first lil step"
-      },
-      // {
-      //     target: '.step2',
-      //     content: "a slighly big second step"
-      // },
-      // {
-      //     target: '.step2',
-      //     content: "a slighly big second step"
-      // },
+    {
+      target: 'header',
+      content: <h2>Welcome to IAQN!</h2>,
+      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+      placement: 'bottom',
+    },
+    {
+      target: '.map-wrapper',
+      content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
+      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+      placement: 'center',
+    },
+    {
+      target: '.map-control',
+      content: <h2>Customize your map settings to fit your needs—control parameters, layers, and more!</h2>,
+      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+      placement: 'left',
+    },
+    {
+      target: '.slider-container',
+      content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
+      locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+      placement: 'left',
+    },
+    {
+      target: '.home',
+      content: <h2>And that’s a wrap! You’re ready to explore our platform and make the most of it.</h2>,
+      locale: { skip: null, last: <strong>Finish 🎉</strong> },
+      placement: 'center',
+      hideEndButton: true,
+    }
   ]
+  
+  const defaultOptions = {
+    arrowColor: '#fff',
+    backgroundColor: '#fff',
+    beaconSize: 36,
+    overlayColor: 'rgba(0, 0, 0, 0.5)',
+    primaryColor: '#f04',
+    spotlightShadow: '0 0 15px rgba(0, 0, 0, 0.5)',
+    textColor: '#333',
+    width: undefined,
+    zIndex: 2000,
+    // position: 'center'
+  };
   return (
-    <Flex direction="column" height="100vh" width="100vw">
+    <Flex direction="column" height="100vh" width="100vw" className='home'>
+      <Joyride
+        steps={steps}
+        run={onboarding}
+        continuous={true}
+        showSkipButton={true}
+        showProgress={true}
+        onStepChange={(data) => console.log('Step changed', data)}
+        onFinish={() => console.log('Tour finished!')}
+        styles={{
+          options: defaultOptions,
+        }}
+      />
       {/* Top Toolbar */}
       <Box
         as="header"
@@ -267,6 +311,7 @@ const Home = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
+        className='header'
       >
         <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
         <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
@@ -276,7 +321,8 @@ const Home = () => {
       </Box>
 
       {/* Map */}
-      <Box display={'flex'} flex="1">
+      <Box display={'flex'} flex="1" className='map-wrapper'>
+
         <MapContainer
           center={[27.0, 80.0]}
           zoom={6}
@@ -284,24 +330,24 @@ const Home = () => {
           maxZoom={18}
           style={{ width: '100%', flexGrow: 1, display: 'flex' }}
           ref={map}
-        >
+          >
           <TileLayer
             url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             subdomains="iaqn.org"
             zIndex={0}
-          />
-          {heatmaps.length && polygonBounds && (
-            <AQIHeatmapLayer 
-              heatmaps={heatmaps}
-              firemaps={firemapsEnabled ? firemaps : []}
-              stations={staionsEnabled ? staions : []}
-              currentIndex={currentIndex}
-              polygonBounds={polygonBounds}
-              opacity={opacity}
-              transitionIntervalInMs={transitionTimeMs}
-              transitionSteps={transitionSteps}
             />
+          {heatmaps.length && polygonBounds && (
+              <AQIHeatmapLayer 
+                heatmaps={heatmaps}
+                firemaps={firemapsEnabled ? firemaps : []}
+                stations={staionsEnabled ? staions : []}
+                currentIndex={currentIndex}
+                polygonBounds={polygonBounds}
+                opacity={opacity}
+                transitionIntervalInMs={transitionTimeMs}
+                transitionSteps={transitionSteps}
+              />
           )}
 
           <MapControl 
@@ -311,7 +357,7 @@ const Home = () => {
             setFiremapsEnabled={setFiremapsEnabled}
             stationsEnabled={staionsEnabled}
             setStationsEnabled={setStationsEnabled}
-          />
+            />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -460,28 +506,7 @@ const Home = () => {
 
         </Box>
       </Box>
-
-      <Joyride
-        steps={steps}
-        run={onboarding}
-        continuous={true}
-        showSkipButton={true}
-        showProgress={true}
-        onStepChange={(data) => console.log('Step changed', data)}
-        onFinish={() => console.log('Tour finished!')}
-      />
-      {/* <button onClick={() => {setOnboarding(true); console.log("first")}}>Start Tour</button> */}
-      {/* <div style={{ position: 'relative', top: '0', left: '0', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="first-step" style={{ marginTop: '100px', color: 'black',  }}>
-          First step content.
-        </div>
-        <div className="second-step" style={{ marginTop: '100px', color: 'black' }}>
-          Second step content.
-        </div>
-        <div className="third-step" style={{ marginTop: '100px', color: 'black' }}>
-          Third step content.
-        </div>
-      </div> */}
+    
     </Flex>
   );
 };
