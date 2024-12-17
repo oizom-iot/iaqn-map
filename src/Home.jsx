@@ -307,7 +307,8 @@ const Home = () => {
                 right: window.innerWidth < 760 ? (window.innerWidth > 540) ? "15%" : "20%" : "auto",
                 transformOrigin: "top left"
               },
-            }
+            },
+            disableScrolling: true
           },
           {
             target: ".slider-container",
@@ -369,7 +370,7 @@ const Home = () => {
             maxWidth: "80vw",
             zIndex: 2000,
             padding: "10px",
-            
+            disableScrolling: true
             // position: 'absolute'
           },
           tooltip: {
