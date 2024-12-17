@@ -291,36 +291,30 @@ const Home = () => {
         {
           target: 'header',
           content: <h2>Welcome to IAQN!</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'bottom',
         },
         {
           target: '.map-wrapper',
           content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           // placement: 'center',
         },
         {
           target: '.map-control',
           content: <h2>Customize your map settings to fit your needs—control parameters, enable/disable firemaps and stations layer.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'left',
         },
         {
           target: '.slider-container',
           content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'left',
         },
         {
           target: '.calender-button',
           content: <h2>Use Calender to view data on customize period.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
         },
         {
           target: '.play-button',
           content: <h2>Use Play/Pause button to explore Maps in visulization.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
         },
         {
           target: '.home',
@@ -337,7 +331,14 @@ const Home = () => {
         onStepChange={(data) => console.log('Step changed', data)}
         onFinish={() => console.log('Tour finished!')}
         styles={{
-          options: defaultOptions,
+          options: {
+            arrowColor: '#ffffff',
+            backgroundColor: '#ffffff',
+            overlayColor: 'rgba(0, 0, 0, 0.4)',
+            primaryColor: '#45A94E',
+            textColor: '#000000',
+            zIndex: 1000
+          }
         }}
       />
       {/* Top Toolbar */}
