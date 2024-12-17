@@ -266,19 +266,6 @@ const Home = () => {
 
   preload(heatmaps);
 
-  const defaultOptions = {
-    arrowColor: "#fff",
-    backgroundColor: "#fff",
-    beaconSize: 36,
-    overlayColor: "rgba(0, 0, 0, 0.5)",
-    primaryColor: "#f04",
-    spotlightShadow: "0 0 15px rgba(0, 0, 0, 0.5)",
-    textColor: "#333",
-    width: "auto",
-    maxWidth: "80vw",
-    zIndex: 2000,
-    // position: 'absolute'
-  };
   return (
     <Flex direction="column" height="100vh" width="100vw" className="home">
       <Joyride
@@ -288,6 +275,11 @@ const Home = () => {
             content: <h2>Welcome to IAQN!</h2>,
             locale: { skip: <strong aria-label="skip">Skip this step</strong> },
             placement: "bottom",
+            styles: {
+              tooltip: {
+                transformOrigin: "top left"
+              },
+            }
           },
           {
             target: ".map-wrapper",
@@ -312,8 +304,8 @@ const Home = () => {
             placement: window.innerWidth < 760 ? "bottom" : "left",
             styles: {
               tooltip: {
-                right: window.innerWidth < 760 ? (window.innerWidth > 540) ? "27%" : "30%" : "auto",
-                maxWidth: "500px"
+                right: window.innerWidth < 760 ? (window.innerWidth > 540) ? "15%" : "20%" : "auto",
+                transformOrigin: "top left"
               },
             }
           },
@@ -332,6 +324,11 @@ const Home = () => {
             target: ".calender-button",
             content: <h2>Use Calender to view data on customize period.</h2>,
             locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+            styles: {
+              tooltip: {
+                transformOrigin: "bottom left"
+              },
+            }
           },
           {
             target: ".play-button",
@@ -360,7 +357,25 @@ const Home = () => {
         onStepChange={(data) => console.log("Step changed", data)}
         onFinish={() => console.log("Tour finished!")}
         styles={{
-          options: defaultOptions,
+          options: {
+            arrowColor: "#fff",
+            backgroundColor: "#fff",
+            beaconSize: 36,
+            overlayColor: "rgba(0, 0, 0, 0.5)",
+            primaryColor: "#f04",
+            spotlightShadow: "0 0 15px rgba(0, 0, 0, 0.5)",
+            textColor: "#333",
+            width: "auto",
+            maxWidth: "80vw",
+            zIndex: 2000,
+            padding: "10px",
+            
+            // position: 'absolute'
+          },
+          tooltip: {
+            transform: window.innerWidth < 768 ? "scale(0.8)" : "scale(1)",
+            transformOrigin: "bottom"
+          },
         }}
       />
       {/* Top Toolbar */}
