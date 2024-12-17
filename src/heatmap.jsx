@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ImageOverlay, GeoJSON, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet'; // Import Leaflet for marker customization
-import { FireIcon } from './assets/assets';
+import fireIcon from './assets/fire.png';
+import stationIcon from './assets/circle.png'
+
 const AQIHeatmapLayer = ({ 
   heatmaps, 
   firemaps,
@@ -51,7 +53,7 @@ const AQIHeatmapLayer = ({
   const firePointToLayer = (feature, latlng) => {
     const marker = L.marker(latlng, {
       icon: L.icon({
-        iconUrl: 'src/assets/fire.png',
+        iconUrl: fireIcon,
         iconSize: [15, 15],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
@@ -79,7 +81,7 @@ const AQIHeatmapLayer = ({
   const stationPointToLayer = (feature, latlng) => {
     const marker = L.marker(latlng, {
       icon: L.icon({
-        iconUrl: 'src/assets/circle.png',
+        iconUrl: stationIcon,
         iconSize: [20, 20 ],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
