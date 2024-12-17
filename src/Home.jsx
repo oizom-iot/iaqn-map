@@ -241,7 +241,34 @@ const Home = () => {
 
   preload(heatmaps);
 
-  
+  // Define the date range
+  const diwaliStartDate = new Date("2024-10-29");
+  const diwaliEndDate = new Date("2024-11-03");
+
+  // check if the date falls within the range
+  const isDateInRange = (date) => {
+    return date >= diwaliStartDate && date <= diwaliEndDate;
+  };
+
+  // Extract the date from the heatmap filename
+  const currentDateString = heatmaps[currentIndex]
+    ? new Date(heatmaps[currentIndex]?.split("/").pop()?.replace(".png", ""))
+    : null;
+
+  // Format the date
+  const formattedDate = currentDateString
+    ? currentDateString.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "--";
+
+  // append text if the date is within the range
+  const dateWithText =
+    currentDateString && isDateInRange(currentDateString)
+      ? `${formattedDate} - Diwali Week`
+      : formattedDate
   
   const defaultOptions = {
     arrowColor: '#fff',
@@ -492,7 +519,7 @@ const Home = () => {
 
                 {/* Slider */}
                 <div style={{ width: '100%', marginRight: '0.5rem' }}>
-                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'> {new Date(heatmaps[currentIndex]?.split('/').pop()?.replace('.png', '')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || '--'}</div>
+                  <div style={{width:'100%', textAlign:'center', margin:'2px 0 0', lineHeight:'5px'}} className='timestamp'>{dateWithText}</div>
                   <input
                     type="range"
                     min="0"
