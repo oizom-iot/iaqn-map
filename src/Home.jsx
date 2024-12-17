@@ -10,6 +10,8 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet'; // Import Leaflet
 import AQIHeatmapLayer from './heatmap';
 import Joyride from 'react-joyride';
+import { MdMenuBook } from "react-icons/md";
+import { BsQuestionCircleFill } from "react-icons/bs";
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
@@ -353,27 +355,15 @@ const Home = () => {
       >
         <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
         <Stack
-    direction={['column', 'row']} // Vertical on mobile, horizontal on larger screens
+    direction={['row', 'row']} // Vertical on mobile, horizontal on larger screens
     spacing="1rem"
     alignItems="center"
   >
-    <Button
-      bg="black"
-      color="white"
-      border="none"
-      variant="outline"
-      onClick={() => {setOnboarding(!onboarding); console.log("first")}}
-    >
-      Quick Guide
-    </Button>
-    <Button
-      bg="black"
-      color="white"
-      border="none"
-      variant="outline"
-    >
-      How To?
-    </Button>
+
+    <MdMenuBook size={45} cursor="pointer" onClick={() => {setOnboarding(!onboarding)}}/>
+    
+    <BsQuestionCircleFill size={35} cursor="pointer"/>
+    
   </Stack>
         {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
         >
