@@ -603,17 +603,7 @@ const Home = () => {
                     }}
                     className="timestamp"
                   >
-                    {" "}
-                    {new Date(
-                      heatmaps[currentIndex]
-                        ?.split("/")
-                        .pop()
-                        ?.replace(".png", "")
-                    ).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }) || "--"}
+                    {dateWithText}
                   </div>
                   <input
                     type="range"
