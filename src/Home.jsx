@@ -10,6 +10,8 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet'; // Import Leaflet
 import AQIHeatmapLayer from './heatmap';
 import Joyride from 'react-joyride';
+import { MdMenuBook } from "react-icons/md";
+import { BsQuestionCircleFill } from "react-icons/bs";
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
@@ -289,36 +291,30 @@ const Home = () => {
         {
           target: 'header',
           content: <h2>Welcome to IAQN!</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'bottom',
         },
         {
           target: '.map-wrapper',
           content: <h2>Explore the map to see how PM distributions and fire events change.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           // placement: 'center',
         },
         {
           target: '.map-control',
           content: <h2>Customize your map settings to fit your needs—control parameters, enable/disable firemaps and stations layer.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'left',
         },
         {
           target: '.slider-container',
           content: <h2>Use the time slider to control the timeline and visualize data over different periods.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
           placement: 'left',
         },
         {
           target: '.calender-button',
           content: <h2>Use Calender to view data on customize period.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
         },
         {
           target: '.play-button',
           content: <h2>Use Play/Pause button to explore Maps in visulization.</h2>,
-          locale: { skip: <strong aria-label="skip">Skip this step</strong> },
         },
         {
           target: '.home',
@@ -335,7 +331,14 @@ const Home = () => {
         onStepChange={(data) => console.log('Step changed', data)}
         onFinish={() => console.log('Tour finished!')}
         styles={{
-          options: defaultOptions,
+          options: {
+            arrowColor: '#ffffff',
+            backgroundColor: '#ffffff',
+            overlayColor: 'rgba(0, 0, 0, 0.4)',
+            primaryColor: '#45A94E',
+            textColor: '#000000',
+            zIndex: 1000
+          }
         }}
       />
       {/* Top Toolbar */}
@@ -353,27 +356,15 @@ const Home = () => {
       >
         <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
         <Stack
-    direction={['column', 'row']} // Vertical on mobile, horizontal on larger screens
+    direction={['row', 'row']} // Vertical on mobile, horizontal on larger screens
     spacing="1rem"
     alignItems="center"
   >
-    <Button
-      bg="black"
-      color="white"
-      border="none"
-      variant="outline"
-      onClick={() => {setOnboarding(!onboarding); console.log("first")}}
-    >
-      Quick Guide
-    </Button>
-    <Button
-      bg="black"
-      color="white"
-      border="none"
-      variant="outline"
-    >
-      How To?
-    </Button>
+
+    <MdMenuBook size={45} cursor="pointer" onClick={() => {setOnboarding(!onboarding)}}/>
+    
+    <BsQuestionCircleFill size={35} cursor="pointer"/>
+    
   </Stack>
         {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
         >
