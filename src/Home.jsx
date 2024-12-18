@@ -20,13 +20,19 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
-import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
-import { Field } from '@/components/ui/field';
-import geojsonBounds from '@/constants/geojsonBounds.json';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet'; // Import Leaflet
-import AQIHeatmapLayer from './heatmap';
-import Joyride from 'react-joyride';
+import {
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverRoot,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Field } from "@/components/ui/field";
+import geojsonBounds from "@/constants/geojsonBounds.json";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet"; // Import Leaflet
+import AQIHeatmapLayer from "./heatmap";
+import Joyride from "react-joyride";
 import { MdMenuBook } from "react-icons/md";
 import { BsQuestionCircleFill } from "react-icons/bs";
 
@@ -164,7 +170,7 @@ const Home = () => {
   const playIntervalRef = useRef(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
-  const [onboarding, setOnboarding] = useState(false);
+  const [onboarding, setOnboarding] = useState(true);
 
   const map = useRef();
   firemaps.forEach((firemap) => {
@@ -289,8 +295,8 @@ const Home = () => {
   const dateWithText =
     currentDateString && isDateInRange(currentDateString)
       ? `${formattedDate} - Diwali Week`
-      : formattedDate
-  
+      : formattedDate;
+
   return (
     <Flex direction="column" height="100vh" width="100vw" className="home">
       <Joyride
@@ -302,9 +308,9 @@ const Home = () => {
             placement: "bottom",
             styles: {
               tooltip: {
-                transformOrigin: "top left"
+                transformOrigin: "top left",
               },
-            }
+            },
           },
           {
             target: ".map-wrapper",
@@ -329,11 +335,16 @@ const Home = () => {
             placement: window.innerWidth < 760 ? "bottom" : "left",
             styles: {
               tooltip: {
-                right: window.innerWidth < 760 ? (window.innerWidth > 540) ? "15%" : "20%" : "auto",
-                transformOrigin: "top left"
+                right:
+                  window.innerWidth < 760
+                    ? window.innerWidth > 540
+                      ? "15%"
+                      : "20%"
+                    : "auto",
+                transformOrigin: "top left",
               },
             },
-            disableScrolling: true
+            disableScrolling: true,
           },
           {
             target: ".slider-container",
@@ -352,9 +363,9 @@ const Home = () => {
             locale: { skip: <strong aria-label="skip">Skip this step</strong> },
             styles: {
               tooltip: {
-                transformOrigin: "bottom left"
+                transformOrigin: "bottom left",
               },
-            }
+            },
           },
           {
             target: ".play-button",
@@ -387,20 +398,20 @@ const Home = () => {
             arrowColor: "#fff",
             backgroundColor: "#fff",
             beaconSize: 36,
-            overlayColor: "rgba(0, 0, 0, 0.5)",
-            primaryColor: "#f04",
+            overlayColor: 'rgba(0, 0, 0, 0.4)',
+            primaryColor: '#45A94E',
             spotlightShadow: "0 0 15px rgba(0, 0, 0, 0.5)",
             textColor: "#333",
             width: "auto",
             maxWidth: "80vw",
             zIndex: 2000,
             padding: "10px",
-            disableScrolling: true
+            disableScrolling: true,
             // position: 'absolute'
           },
           tooltip: {
             transform: window.innerWidth < 768 ? "scale(0.8)" : "scale(1)",
-            transformOrigin: "bottom"
+            transformOrigin: "bottom",
           },
         }}
       />
@@ -417,18 +428,30 @@ const Home = () => {
         alignItems="center"
         className="header"
       >
-        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
+        <img
+          src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png"
+          alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis."
+          style={{ width: "142px", height: "44px", objectFit: "cover" }}
+          width="142"
+          height="44"
+          srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png"
+          fetchpriority="high"
+        />
         <Stack
-    direction={['row', 'row']} // Vertical on mobile, horizontal on larger screens
-    spacing="1rem"
-    alignItems="center"
-  >
+          direction={["row", "row"]} // Vertical on mobile, horizontal on larger screens
+          spacing="1rem"
+          alignItems="center"
+        >
+          <MdMenuBook
+            size={45}
+            cursor="pointer"
+            onClick={() => {
+              setOnboarding(!onboarding);
+            }}
+          />
 
-    <MdMenuBook size={45} cursor="pointer" onClick={() => {setOnboarding(!onboarding)}}/>
-    
-    <BsQuestionCircleFill size={35} cursor="pointer"/>
-    
-  </Stack>
+          <BsQuestionCircleFill size={35} cursor="pointer" />
+        </Stack>
         {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
         >
           How To?
