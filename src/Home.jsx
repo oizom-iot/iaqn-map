@@ -20,19 +20,15 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
-import {
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverRoot,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Field } from "@/components/ui/field";
-import geojsonBounds from "@/constants/geojsonBounds.json";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet"; // Import Leaflet
-import AQIHeatmapLayer from "./heatmap";
-import Joyride from "react-joyride";
+import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@/components/ui/popover";
+import { Field } from '@/components/ui/field';
+import geojsonBounds from '@/constants/geojsonBounds.json';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet'; // Import Leaflet
+import AQIHeatmapLayer from './heatmap';
+import Joyride from 'react-joyride';
+import { MdMenuBook } from "react-icons/md";
+import { BsQuestionCircleFill } from "react-icons/bs";
 
 const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
 
@@ -266,6 +262,35 @@ const Home = () => {
 
   preload(heatmaps);
 
+  // Define the date range
+  const diwaliStartDate = new Date("2024-10-29");
+  const diwaliEndDate = new Date("2024-11-03");
+
+  // check if the date falls within the range
+  const isDateInRange = (date) => {
+    return date >= diwaliStartDate && date <= diwaliEndDate;
+  };
+
+  // Extract the date from the heatmap filename
+  const currentDateString = heatmaps[currentIndex]
+    ? new Date(heatmaps[currentIndex]?.split("/").pop()?.replace(".png", ""))
+    : null;
+
+  // Format the date
+  const formattedDate = currentDateString
+    ? currentDateString.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "--";
+
+  // append text if the date is within the range
+  const dateWithText =
+    currentDateString && isDateInRange(currentDateString)
+      ? `${formattedDate} - Diwali Week`
+      : formattedDate
+  
   return (
     <Flex direction="column" height="100vh" width="100vw" className="home">
       <Joyride
@@ -392,36 +417,18 @@ const Home = () => {
         alignItems="center"
         className="header"
       >
-        <img
-          src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png"
-          alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis."
-          style={{ width: "142px", height: "44px", objectFit: "cover" }}
-          width="142"
-          height="44"
-          srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png"
-          fetchPriority="high"
-        />
+        <img src="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" alt="The Indian Air Quality Network (IAQN) is a dynamic platform uniting visionaries—environmentalists, researchers, policymakers, and industry leaders—on a mission to tackle India’s air quality crisis." style={{ width: '142px', height: '44px', objectFit: 'cover' }} width="142" height="44" srcSet="https://static.wixstatic.com/media/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png/v1/fill/w_178,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/e2710f_453b16e486d74e45a568e095ca6e19dd~mv2.png" fetchpriority="high" />
         <Stack
-          direction={["column", "row"]} // Vertical on mobile, horizontal on larger screens
-          spacing="1rem"
-          alignItems="center"
-        >
-          <Button
-            bg="black"
-            color="white"
-            border="none"
-            variant="outline"
-            onClick={() => {
-              setOnboarding(!onboarding);
-              console.log("first");
-            }}
-          >
-            Quick Guide
-          </Button>
-          <Button bg="black" color="white" border="none" variant="outline">
-            How To?
-          </Button>
-        </Stack>
+    direction={['row', 'row']} // Vertical on mobile, horizontal on larger screens
+    spacing="1rem"
+    alignItems="center"
+  >
+
+    <MdMenuBook size={45} cursor="pointer" onClick={() => {setOnboarding(!onboarding)}}/>
+    
+    <BsQuestionCircleFill size={35} cursor="pointer"/>
+    
+  </Stack>
         {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
         >
           How To?
