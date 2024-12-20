@@ -108,13 +108,13 @@ const AQIHeatmapLayer = ({
   return (
     <>
       {/* Render GeoJSON layer with custom markers */}
-      {firemaps[currentIndex] ? (
+      {firemaps[currentIndex] && (
         <GeoJSON
           key={firemaps[currentIndex]._uniqueId}
           data={firemaps[currentIndex]}
           pointToLayer={firePointToLayer}
         />
-      ) : <p>No data</p>}
+      )}
       {stations && (
         <GeoJSON
           key={stations._uniqueId}

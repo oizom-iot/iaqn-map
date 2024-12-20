@@ -52,9 +52,8 @@ function preload(urls) {
 const geojsons = {}; // Global dictionary to store preloaded GeoJSON data
 
 const preloadGeoJSON = async (urls, setFiremaps) => {
-  console.log("urls: ", urls)
-  console.log("Render count: ", renderCount)
-  firemapsToUpdate = []
+  console.log("urls: ", urls, "firemaps: ");
+  // const firemapsToUpdate = new Set()
   for (const url of urls) {
     if (!geojsons[url]) {
       try {
@@ -62,7 +61,7 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
         const data = await response.json();
         geojsons[url] = data; // Store parsed GeoJSON data
         // Update firemaps incrementally
-        firemapsToUpdate.push(data);
+        // firemapsToUpdate.add(data);
         setFiremaps((prevFiremaps) => [...prevFiremaps, data]);
       } catch (error) {
         console.error(`Error preloading GeoJSON: ${url}`, error);
@@ -70,9 +69,7 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
       }
     }
   }
-  if(firemapsToUpdate.length > 0) {
-    setFiremaps(firemapsToUpdate);
-  }
+  // setFiremaps((prevFiremaps) => [...prevFiremaps, ...firemapsToUpdate]);
 };
 
 const MapControl = ({
@@ -163,7 +160,7 @@ const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const Home = () => {
-  const [startDate, setStartDate] = useState("2024-06-01");
+  const [startDate, setStartDate] = useState("2024-12-01");
   const [endDate, setEndDate] = useState("2024-12-19");
   const [parameter, setParameter] = useState("pm25");
   const [heatmaps, setHeatmaps] = useState([]);
@@ -178,11 +175,6 @@ const Home = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const [onboarding, setOnboarding] = useState(true);
-  const [renderCount, setRenderCount] = useState(0);
-
-  useEffect(() => {
-    setRenderCount((prev) => prev + 1);
-  }, []);
 
   const map = useRef();
   firemaps.forEach((firemap) => {
@@ -197,7 +189,7 @@ const Home = () => {
     }
     return urls;
   };
-
+  console.log("firemaps: ", firemaps);
   const fetchStationsData = async () => {
     const stationData = await fetch("src/constants/stations.geojson");
     return stationData.json();
