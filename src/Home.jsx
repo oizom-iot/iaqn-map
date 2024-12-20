@@ -52,7 +52,6 @@ function preload(urls) {
 const geojsons = {}; // Global dictionary to store preloaded GeoJSON data
 
 const preloadGeoJSON = async (urls, setFiremaps) => {
-  console.log("urls: ", urls, "firemaps: ");
   // const firemapsToUpdate = new Set()
   for (const url of urls) {
     if (!geojsons[url]) {
@@ -189,7 +188,6 @@ const Home = () => {
     }
     return urls;
   };
-  console.log("firemaps: ", firemaps);
   const fetchStationsData = async () => {
     const stationData = await fetch("src/constants/stations.geojson");
     return stationData.json();
