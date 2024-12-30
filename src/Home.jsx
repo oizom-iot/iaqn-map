@@ -158,9 +158,13 @@ const MapControl = ({
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
+const yesterdayISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const fifteenDayBackwardISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+
+
 const Home = () => {
-  const [startDate, setStartDate] = useState("2024-12-01");
-  const [endDate, setEndDate] = useState("2024-12-19");
+  const [startDate, setStartDate] = useState(fifteenDayBackwardISO);
+  const [endDate, setEndDate] = useState(yesterdayISO);
   const [parameter, setParameter] = useState("pm25");
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
@@ -175,6 +179,7 @@ const Home = () => {
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const [onboarding, setOnboarding] = useState(true);
 
+  console.log("firemaps", firemaps);  
   const map = useRef();
   firemaps.forEach((firemap) => {
     firemap._uniqueId ??= crypto.randomUUID();
