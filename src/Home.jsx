@@ -35,8 +35,9 @@ import AQIHeatmapLayer from "./heatmap";
 import Joyride from "react-joyride";
 import { MdMenuBook } from "react-icons/md";
 import { BsQuestionCircleFill } from "react-icons/bs";
+import { render } from "react-dom";
 
-const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com"; // Replace with your S3 base URL
+const s3BaseURL = "https://iaqn.s3.us-east-2.amazonaws.com";
 
 const images = {};
 function preload(urls) {
@@ -51,14 +52,15 @@ function preload(urls) {
 const geojsons = {}; // Global dictionary to store preloaded GeoJSON data
 
 const preloadGeoJSON = async (urls, setFiremaps) => {
+  // const firemapsToUpdate = new Set()
   for (const url of urls) {
     if (!geojsons[url]) {
       try {
         const response = await fetch(url);
         const data = await response.json();
         geojsons[url] = data; // Store parsed GeoJSON data
-
         // Update firemaps incrementally
+        // firemapsToUpdate.add(data);
         setFiremaps((prevFiremaps) => [...prevFiremaps, data]);
       } catch (error) {
         console.error(`Error preloading GeoJSON: ${url}`, error);
@@ -66,6 +68,7 @@ const preloadGeoJSON = async (urls, setFiremaps) => {
       }
     }
   }
+  // setFiremaps((prevFiremaps) => [...prevFiremaps, ...firemapsToUpdate]);
 };
 
 const MapControl = ({
@@ -155,9 +158,13 @@ const MapControl = ({
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
+const yesterdayISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const fifteenDayBackwardISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+
+
 const Home = () => {
-  const [startDate, setStartDate] = useState("2024-10-15");
-  const [endDate, setEndDate] = useState("2024-12-01");
+  const [startDate, setStartDate] = useState(fifteenDayBackwardISO);
+  const [endDate, setEndDate] = useState(yesterdayISO);
   const [parameter, setParameter] = useState("pm25");
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
@@ -172,6 +179,7 @@ const Home = () => {
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const [onboarding, setOnboarding] = useState(true);
 
+  console.log("firemaps", firemaps);  
   const map = useRef();
   firemaps.forEach((firemap) => {
     firemap._uniqueId ??= crypto.randomUUID();
@@ -181,11 +189,10 @@ const Home = () => {
     const urls = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const formattedDate = d.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-      urls.push(`${s3BaseURL}/${param}/${formattedDate}.geojson`);
+      urls.push(`${s3BaseURL}/${param}/${formattedDate}.geojson`)
     }
     return urls;
   };
-
   const fetchStationsData = async () => {
     const stationData = await fetch("src/constants/stations.geojson");
     return stationData.json();
@@ -290,6 +297,10 @@ const Home = () => {
         year: "numeric",
       })
     : "--";
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate()-1)
+    const formattedYesterday = yesterday.toISOString().split('T')[0];
+    
 
   // append text if the date is within the range
   const dateWithText =
@@ -567,6 +578,8 @@ const Home = () => {
                             type="date"
                             value={endDate}
                             className="datepicker"
+                            max={formattedYesterday}
+                            min={new Date("2024-08-01").toISOString().split('T')[0]}
                             onChange={(e) => setEndDate(e.target.value)}
                           />
                         </Field>
