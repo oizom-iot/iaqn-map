@@ -18,6 +18,7 @@ import {
   useMap,
   ImageOverlay,
   ZoomControl,
+  LayersControl,
 } from "react-leaflet";
 import { IoPlay, IoPause, IoCalendar } from "react-icons/io5";
 import {
@@ -90,6 +91,7 @@ const MapControl = ({
   const toggleFiremaps = () => setFiremapsEnabled((prev) => !prev);
   const toggleStations = () => setStationsEnabled((prev) => !prev);
 
+
   return (
     <Box
       p={4}
@@ -158,13 +160,13 @@ const MapControl = ({
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
-const yesterdayISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-const fifteenDayBackwardISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+const endDateISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
 
 const Home = () => {
-  const [startDate, setStartDate] = useState(fifteenDayBackwardISO);
-  const [endDate, setEndDate] = useState(yesterdayISO);
+  const [startDate, setStartDate] = useState(startDateISO);
+  const [endDate, setEndDate] = useState(endDateISO);
   const [parameter, setParameter] = useState("pm25");
   const [heatmaps, setHeatmaps] = useState([]);
   const [firemaps, setFiremaps] = useState([]);
@@ -178,6 +180,8 @@ const Home = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [firemapsEnabled, setFiremapsEnabled] = useState(true);
   const [onboarding, setOnboarding] = useState(true);
+
+  const { BaseLayer } = LayersControl;
 
   console.log("firemaps", firemaps);  
   const map = useRef();
@@ -471,51 +475,95 @@ const Home = () => {
 
       {/* Map */}
       <Box display={"flex"} flex="1" className="map-wrapper">
-        <MapContainer
-          center={[27.0, 80.0]}
-          zoom={6}
-          minZoom={6}
-          maxZoom={18}
-          style={{ width: "100%", flexGrow: 1, display: "flex" }}
-          ref={map}
-        >
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            subdomains="iaqn.org"
-            zIndex={0}
-          />
-          {heatmaps.length && polygonBounds && (
-            <AQIHeatmapLayer
-              heatmaps={heatmaps}
-              firemaps={firemapsEnabled ? firemaps : []}
-              stations={staionsEnabled ? staions : []}
-              currentIndex={currentIndex}
-              polygonBounds={polygonBounds}
-              opacity={opacity}
-              transitionIntervalInMs={transitionTimeMs}
-              transitionSteps={transitionSteps}
+      <MapContainer
+        center={[27.0, 80.0]}
+        zoom={6}
+        minZoom={6}
+        maxZoom={18}
+        style={{ width: "100%", flexGrow: 1, display: "flex" }}
+        ref={map}
+      >
+        <LayersControl position="topleft">
+          {/* OpenStreetMap Basemap */}
+          <BaseLayer checked name="OpenStreetMap">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-          )}
+          </BaseLayer>
 
-          <MapControl
-            parameter={parameter}
-            setParameter={setParameter}
-            firemapsEnabled={firemapsEnabled}
-            setFiremapsEnabled={setFiremapsEnabled}
-            stationsEnabled={staionsEnabled}
-            setStationsEnabled={setStationsEnabled}
-          />
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            subdomains="iaqn.org"
-            opacity={0.5}
-            zIndex={200}
-            pane="overlayPane"
-          />
-        </MapContainer>
+          {/* CartoDB Positron (Light) */}
+          <BaseLayer name="CartoDB Positron">
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+          </BaseLayer>
 
+          {/* CartoDB Dark Matter (Dark Map) */}
+          <BaseLayer name="CartoDB Dark Matter">
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+          </BaseLayer>
+
+          {/* Stamen Terrain using the provided URL */}
+          <BaseLayer name="Stamen Terrain">
+            <TileLayer
+              url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}@2x.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://stadiamaps.com/copyright">Stadia Maps</a>'
+            />
+          </BaseLayer>
+
+          {/* OpenTopoMap (Topographic) */}
+          <BaseLayer name="OpenTopoMap">
+            <TileLayer
+              url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://opentopomap.org/copyright">OpenTopoMap</a>'
+            />
+          </BaseLayer>
+
+          {/* Esri Satellite */}
+          <BaseLayer name="Esri Satellite">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/en-us/about/company/online-attribution">Esri</a>'
+            />
+          </BaseLayer>
+        </LayersControl>
+
+        {heatmaps.length && polygonBounds && (
+          <AQIHeatmapLayer
+            heatmaps={heatmaps}
+            firemaps={firemapsEnabled ? firemaps : []}
+            stations={staionsEnabled ? staions : []}
+            currentIndex={currentIndex}
+            polygonBounds={polygonBounds}
+            opacity={opacity}
+            transitionIntervalInMs={transitionTimeMs}
+            transitionSteps={transitionSteps}
+          />
+        )}
+
+        <MapControl
+          parameter={parameter}
+          setParameter={setParameter}
+          firemapsEnabled={firemapsEnabled}
+          setFiremapsEnabled={setFiremapsEnabled}
+          stationsEnabled={staionsEnabled}
+          setStationsEnabled={setStationsEnabled}
+        />
+
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.pngcl"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          subdomains="iaqn.org"
+          opacity={0.5}
+          zIndex={200}
+          pane="overlayPane"
+        />
+      </MapContainer>
         {/* Controls */}
         <Box
           display="flex"
