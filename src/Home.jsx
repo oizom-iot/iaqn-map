@@ -182,6 +182,7 @@ const Home = () => {
   const [onboarding, setOnboarding] = useState(true);
 
   const { BaseLayer } = LayersControl;
+  console.log("staions", staions);
 
   console.log("firemaps", firemaps);  
   const map = useRef();
@@ -198,7 +199,7 @@ const Home = () => {
     return urls;
   };
   const fetchStationsData = async () => {
-    const stationData = await fetch("src/constants/stations.geojson");
+    const stationData = await fetch("/stations.geojson");
     return stationData.json();
   };
   const initializeStations = async () => {

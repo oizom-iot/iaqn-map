@@ -6,7 +6,8 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: path.join(__dirname, "_static")
+    outDir: path.join(__dirname, "build"),
+    // assetsInlineLimit: 4096,
   },
   resolve: {
     alias: {
