@@ -510,12 +510,12 @@ const Home = () => {
           </BaseLayer>
 
           {/* Stamen Terrain using the provided URL */}
-          <BaseLayer name="Stamen Terrain">
+          {/* <BaseLayer name="Stamen Terrain">
             <TileLayer
               url="https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}@2x.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://stadiamaps.com/copyright">Stadia Maps</a>'
             />
-          </BaseLayer>
+          </BaseLayer> */}
 
           {/* OpenTopoMap (Topographic) */}
           <BaseLayer name="OpenTopoMap">
