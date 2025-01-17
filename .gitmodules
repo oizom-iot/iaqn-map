@@ -1,0 +1,3 @@
+[submodule "iaqn-backend"]
+	path = iaqn-backend
+	url = git@github.com:oizom-iot/iaqn-backend.git
