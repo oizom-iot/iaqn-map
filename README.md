@@ -1,4 +1,4 @@
-# Indian Air Quality Network Documentation
+# Indian Air Quality Network
 
 Welcome to the Indian Air Quality Network (IAQN)! This platform provides insightful, real-time information on air quality across the **North Indian belt** through various visualizations and data tools. Our mission is to raise awareness of air quality issues and empower users with accurate data to make informed decisions.
 

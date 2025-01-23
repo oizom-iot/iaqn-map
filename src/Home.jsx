@@ -161,7 +161,7 @@ const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
 const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
-const endDateISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const endDateISO = new Date(Date.now() - 2*86400000).toISOString().split('T')[0];
 
 
 const Home = () => {
