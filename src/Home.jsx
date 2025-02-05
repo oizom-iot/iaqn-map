@@ -160,8 +160,10 @@ const MapControl = ({
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
-const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
-const endDateISO = new Date(Date.now() - 2*86400000).toISOString().split('T')[0];
+// const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+// const endDateISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const startDateISO = new Date("2024-10-15").toISOString().split('T')[0];
+const endDateISO = new Date("2024-10-30").toISOString().split('T')[0];
 
 
 const Home = () => {
@@ -173,7 +175,7 @@ const Home = () => {
   const [staions, setStaions] = useState([]);
   const [staionsEnabled, setStationsEnabled] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [heatmapPlaying, setHeatmapPlaying] = useState(false);
+  const [heatmapPlaying, setHeatmapPlaying] = useState(true);
   const [opacity, setOpacity] = useState(0.6);
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
