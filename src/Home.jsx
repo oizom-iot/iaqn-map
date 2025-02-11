@@ -160,8 +160,10 @@ const MapControl = ({
 const playSpeedMs = 1000;
 const transitionTimeMs = playSpeedMs / 4;
 const transitionSteps = 100;
-const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
-const endDateISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+// const startDateISO = new Date(Date.now() - (16*86400000)).toISOString().split('T')[0];
+// const endDateISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const startDateISO = new Date("2024-10-15").toISOString().split('T')[0];
+const endDateISO = new Date("2024-10-30").toISOString().split('T')[0];
 
 
 const Home = () => {
@@ -173,7 +175,7 @@ const Home = () => {
   const [staions, setStaions] = useState([]);
   const [staionsEnabled, setStationsEnabled] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [heatmapPlaying, setHeatmapPlaying] = useState(false);
+  const [heatmapPlaying, setHeatmapPlaying] = useState(true);
   const [opacity, setOpacity] = useState(0.6);
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
@@ -363,6 +365,16 @@ const Home = () => {
             disableScrolling: true,
           },
           {
+            target: ".leaflet-control-layers-toggle",
+            content: (
+              <h2>
+                Use the layer control to switch between different basemaps.
+              </h2>
+            ),
+            locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+            placement: "left",
+          },
+          {
             target: ".slider-container",
             content: (
               <h2>
@@ -389,6 +401,26 @@ const Home = () => {
               <h2>Use Play/Pause button to explore Maps in visulization.</h2>
             ),
             locale: { skip: <strong aria-label="skip">Skip this step</strong> },
+          },
+          {
+            target: ".onboarding",
+            content: (
+              <h2>
+                Need help? Click here to view the onboarding guide again.
+              </h2>
+            ),
+            locale: { skip: null, last: <strong>Finish 🎉</strong> },
+            placement: "left",
+          },
+          {
+            target: ".source-code",
+            content: (
+              <h2>
+                Want to explore the source code? Click here to view the GitHub
+              </h2>
+            ),
+            locale: { skip: null, last: <strong>Finish 🎉</strong> },
+            placement: "left",
           },
           {
             target: ".home",
@@ -464,9 +496,16 @@ const Home = () => {
             onClick={() => {
               setOnboarding(!onboarding);
             }}
+            className="onboarding"
           />
 
-          <BsQuestionCircleFill size={35} cursor="pointer" />
+          <BsQuestionCircleFill 
+            size={35} cursor="pointer"
+            onClick={()=>{
+              window.open('https://github.com/oizom-iot/iaqn-map', '_blank');
+            }}
+            className="source-code"
+          />
         </Stack>
         {/* <Button bg={'black'} outline={'none !important'} color={'white'} border={'none'} variant={'outline'}
         >
