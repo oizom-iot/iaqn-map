@@ -51,7 +51,7 @@ const AQIHeatmapLayer = ({
   }, [currentIndex, heatmaps, transitionSteps, transitionIntervalInMs, transitionStage.currentImage]);
 
   const firePointToLayer = (feature, latlng) => {
-    console.log("fireicon: ", fireIcon)
+    // console.log("fireicon: ", fireIcon)
     const marker = L.marker(latlng, {
       icon: L.icon({
         iconUrl: fireIcon,
@@ -80,7 +80,7 @@ const AQIHeatmapLayer = ({
     
   };
   const stationPointToLayer = (feature, latlng) => {
-    console.log("stationIcon: ", stationIcon)
+    // console.log("stationIcon: ", stationIcon)
     const marker = L.marker(latlng, {
       icon: L.icon({
         iconUrl: stationIcon,

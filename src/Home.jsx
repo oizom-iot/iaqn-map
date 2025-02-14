@@ -175,7 +175,7 @@ const Home = () => {
   const [staions, setStaions] = useState([]);
   const [staionsEnabled, setStationsEnabled] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [heatmapPlaying, setHeatmapPlaying] = useState(true);
+  const [heatmapPlaying, setHeatmapPlaying] = useState(false);
   const [opacity, setOpacity] = useState(0.6);
   const [polygonBounds, setPolygonBounds] = useState(null); // Assuming geojsonBounds is precomputed GeoJSON bounds
   const playIntervalRef = useRef(null);
@@ -184,9 +184,9 @@ const Home = () => {
   const [onboarding, setOnboarding] = useState(true);
 
   const { BaseLayer } = LayersControl;
-  console.log("staions", staions);
+  // console.log("staions", staions);
 
-  console.log("firemaps", firemaps);  
+  // console.log("firemaps", firemaps);  
   const map = useRef();
   firemaps.forEach((firemap) => {
     firemap._uniqueId ??= crypto.randomUUID();
@@ -222,15 +222,23 @@ const Home = () => {
   const togglePlayPause = () => {
     if (heatmaps.length === 0) return;
     if (heatmapPlaying) {
-      clearInterval(playIntervalRef.current);
+      pauseHeatmaps();
     } else {
-      playIntervalRef.current = setInterval(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % heatmaps.length);
-      }, playSpeedMs); // Change heatmap every second
+      playHeatmaps();
     }
     setHeatmapPlaying(!heatmapPlaying);
   };
-
+  const playHeatmaps = () => {
+    if (heatmaps.length === 0) return;
+    playIntervalRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % heatmaps.length);
+    }, playSpeedMs); // Change heatmap every second
+    setHeatmapPlaying(true);
+  };
+  const pauseHeatmaps = () => {
+    clearInterval(playIntervalRef.current);
+    setHeatmapPlaying(false);
+  };
   // Handle slider input
   const handleSliderChange = (e) => {
     setCurrentIndex(parseInt(e.target.value, 10));
@@ -281,6 +289,13 @@ const Home = () => {
   }, [parameter]);
 
   preload(heatmaps);
+
+  useEffect(() => {
+    playHeatmaps();
+    return () => {
+      clearInterval(playIntervalRef.current);
+    };
+  }, [heatmaps]);
 
   // Define the date range
   const diwaliStartDate = new Date("2024-10-29");
@@ -439,8 +454,8 @@ const Home = () => {
         continuous={true}
         showSkipButton={true}
         showProgress={true}
-        onStepChange={(data) => console.log("Step changed", data)}
-        onFinish={() => console.log("Tour finished!")}
+        // onStepChange={(data) => console.log("Step changed", data)}
+        // onFinish={() => console.log("Tour finished!")}
         styles={{
           options: {
             arrowColor: "#fff",
